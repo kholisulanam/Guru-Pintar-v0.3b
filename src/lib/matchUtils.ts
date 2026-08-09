@@ -12,10 +12,13 @@ export function cleanStr(s: string): string {
  */
 export function stripTeacherTitles(name: string): string {
   if (!name) return '';
-  return name
+  const normalized = name
     .toLowerCase()
-    .replace(/\b(dra|drs|dr|prof|h|hj|ir|kh|k\.h|ust|ustadz|amd|s\.pd|s\.pd\.i|m\.pd|m\.pd\.i|s\.si|m\.si|s\.t|m\.t|s\.sos|s\.sos\.i|s\.ag|m\.ag|s\.e|m\.m|lc|m\.a|s\.kom|m\.kom|s\.hum|m\.hum|s\.i\.p|s\.h|m\.h|pd\.i|pd|si|ag|sos\.i|sos)\b/gi, '')
-    .replace(/[^a-z0-9\s]/gi, ' ')
+    .replace(/\./g, '')
+    .replace(/[^a-z0-9\s]/g, ' ');
+
+  return normalized
+    .replace(/\b(dra|drs|dr|prof|h|hj|ir|kh|ust|ustadz|amd|spd|spdi|mpd|mpdi|ssi|msi|st|mt|ssos|ssosi|sag|mag|se|mm|lc|ma|skom|mkom|shum|mhum|sip|sh|mh|shi|pd|si|ag|sos)\b/gi, '')
     .replace(/\s+/g, ' ')
     .trim();
 }
@@ -49,7 +52,7 @@ export function matchTeacher(rawGuru: string, teachers: TeacherItem[]): TeacherI
   if (exact) return exact;
 
   // 2. Cleaned Alphanumeric Exact Match
-  const cleanMatch = teachers.find((t) => cleanStr(t.nama) === rawClean);
+  const cleanMatch = teachers.find((t) => cleanStr(t.nama) === rawClean || cleanStr(t.id) === rawClean);
   if (cleanMatch) return cleanMatch;
 
   // 3. Stripped Titles Core Name Exact Match
@@ -62,7 +65,7 @@ export function matchTeacher(rawGuru: string, teachers: TeacherItem[]): TeacherI
     if (coreMatch) return coreMatch;
   }
 
-  // 4. Distinctive Tokens Exact Match (e.g., "Kamilah", "Awiyani", "Arifin", "Rusdi")
+  // 4. Distinctive Tokens Exact Match
   const rawDistinctiveTokens = getTeacherCoreTokens(raw);
   if (rawDistinctiveTokens.length > 0) {
     const tokenMatch = teachers.find((t) => {
@@ -74,9 +77,94 @@ export function matchTeacher(rawGuru: string, teachers: TeacherItem[]): TeacherI
       );
     });
     if (tokenMatch) return tokenMatch;
+
+    // 5. Partial Token Match
+    const partialMatch = teachers.find((t) => {
+      const tTokens = getTeacherCoreTokens(t.nama);
+      return rawDistinctiveTokens.some((tok) => tTokens.includes(tok));
+    });
+    if (partialMatch) return partialMatch;
   }
 
   return null;
+}
+
+/**
+ * Check if a schedule's / journal's / attendance's guruId matches a given target teacher filter or User object.
+ */
+export function isTeacherMatch(
+  schGuruId: string,
+  targetGuruFilterOrUser: string | { id: string; nama?: string; name?: string; nuptk?: string; nuptkOrNisn?: string } | null | undefined,
+  teachers: TeacherItem[] = []
+): boolean {
+  if (!schGuruId || !targetGuruFilterOrUser) return false;
+
+  const filterStr = typeof targetGuruFilterOrUser === 'string'
+    ? targetGuruFilterOrUser
+    : (targetGuruFilterOrUser.id || targetGuruFilterOrUser.nama || targetGuruFilterOrUser.name || '');
+
+  if (filterStr === 'Semua') return true;
+
+  const schRaw = schGuruId.trim();
+  const filterRaw = filterStr.trim();
+
+  // 1. Direct string equality (case-insensitive)
+  if (schRaw.toLowerCase() === filterRaw.toLowerCase()) return true;
+
+  // 2. Direct cleanStr equality
+  if (cleanStr(schRaw) === cleanStr(filterRaw)) return true;
+
+  // 3. Compare stripped titles directly
+  const schCore = stripTeacherTitles(schRaw);
+  const filterCore = stripTeacherTitles(filterRaw);
+  if (schCore && filterCore && schCore === filterCore) return true;
+
+  // 4. Resolve target teacher
+  let targetTeacher: TeacherItem | null = null;
+  if (typeof targetGuruFilterOrUser !== 'string') {
+    const tName = targetGuruFilterOrUser.nama || targetGuruFilterOrUser.name || '';
+    const tNuptk = targetGuruFilterOrUser.nuptk || targetGuruFilterOrUser.nuptkOrNisn || '';
+    targetTeacher = matchTeacher(targetGuruFilterOrUser.id, teachers) ||
+                    matchTeacher(tName, teachers) ||
+                    (tNuptk ? teachers.find((t) => t.nuptk === tNuptk) || null : null) ||
+                    {
+                      id: targetGuruFilterOrUser.id,
+                      nama: tName,
+                      nuptk: tNuptk,
+                      mengajarMapel: '',
+                      status: 'Aktif',
+                    };
+  } else {
+    targetTeacher = teachers.find((t) => t.id === filterRaw) || matchTeacher(filterRaw, teachers);
+  }
+
+  // 5. Resolve schGuruId against teachers list
+  const schTeacher = teachers.find((t) => t.id === schRaw) || matchTeacher(schRaw, teachers);
+
+  // If both resolved to teachers, compare their resolved IDs or stripped names
+  if (schTeacher && targetTeacher) {
+    if (schTeacher.id === targetTeacher.id) return true;
+    if (schTeacher.nama && targetTeacher.nama && cleanStr(schTeacher.nama) === cleanStr(targetTeacher.nama)) return true;
+    if (schTeacher.nama && targetTeacher.nama && stripTeacherTitles(schTeacher.nama) === stripTeacherTitles(targetTeacher.nama)) return true;
+  }
+
+  // Fallback comparisons with schRaw
+  if (targetTeacher) {
+    if (schRaw.toLowerCase() === targetTeacher.id.toLowerCase()) return true;
+    if (targetTeacher.nama && schRaw.toLowerCase() === targetTeacher.nama.toLowerCase()) return true;
+    if (targetTeacher.nama && cleanStr(schRaw) === cleanStr(targetTeacher.nama)) return true;
+    if (targetTeacher.nama && stripTeacherTitles(schRaw) === stripTeacherTitles(targetTeacher.nama)) return true;
+  }
+
+  // Fallback comparisons with filterRaw
+  if (schTeacher) {
+    if (filterRaw.toLowerCase() === schTeacher.id.toLowerCase()) return true;
+    if (schTeacher.nama && filterRaw.toLowerCase() === schTeacher.nama.toLowerCase()) return true;
+    if (schTeacher.nama && cleanStr(filterRaw) === cleanStr(schTeacher.nama)) return true;
+    if (schTeacher.nama && stripTeacherTitles(filterRaw) === stripTeacherTitles(schTeacher.nama)) return true;
+  }
+
+  return false;
 }
 
 /**
@@ -140,6 +228,47 @@ export function matchClass(rawKelas: string, classes: ClassItem[]): ClassItem | 
   if (normMatch) return normMatch;
 
   return null;
+}
+
+/**
+ * Check if a student's or schedule's kelasId matches a target class filter or ID.
+ */
+export function isClassMatch(
+  studentKelasId: string,
+  targetKelasId: string,
+  classes: ClassItem[] = []
+): boolean {
+  if (!studentKelasId || !targetKelasId) return false;
+  if (targetKelasId === 'semua' || targetKelasId === 'Semua') return true;
+
+  const sRaw = studentKelasId.trim();
+  const tRaw = targetKelasId.trim();
+
+  // 1. Direct equality
+  if (sRaw.toLowerCase() === tRaw.toLowerCase()) return true;
+
+  // 2. Cleaned equality
+  if (cleanStr(sRaw) === cleanStr(tRaw)) return true;
+
+  // 3. Match against classes list
+  const studentClass = classes.find((c) => c.id === sRaw) || matchClass(sRaw, classes);
+  const targetClass = classes.find((c) => c.id === tRaw) || matchClass(tRaw, classes);
+
+  if (studentClass && targetClass) {
+    return studentClass.id === targetClass.id;
+  }
+
+  if (targetClass) {
+    if (sRaw.toLowerCase() === targetClass.id.toLowerCase()) return true;
+    if (cleanStr(sRaw) === cleanStr(targetClass.namaKelas)) return true;
+  }
+
+  if (studentClass) {
+    if (tRaw.toLowerCase() === studentClass.id.toLowerCase()) return true;
+    if (cleanStr(tRaw) === cleanStr(studentClass.namaKelas)) return true;
+  }
+
+  return false;
 }
 
 /**

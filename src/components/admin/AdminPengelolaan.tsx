@@ -341,7 +341,7 @@ export const AdminPengelolaan: React.FC<AdminPengelolaanProps> = ({
     nama: '',
     nisn: '',
     ttl: '',
-    kelasId: classes[0]?.id || 'cls-12ipa1',
+    kelasId: classes[0]?.id || 'cls-12a',
     jenisKelamin: 'L' as 'L' | 'P',
   });
 
@@ -438,7 +438,7 @@ export const AdminPengelolaan: React.FC<AdminPengelolaanProps> = ({
       setUsers((prev) => [...prev.filter((u) => u.username !== newUser.username), newUser]);
     }
 
-    setNewSiswa({ nama: '', nisn: '', ttl: '', kelasId: classes[0]?.id || 'cls-12ipa1', jenisKelamin: 'L' });
+    setNewSiswa({ nama: '', nisn: '', ttl: '', kelasId: classes[0]?.id || 'cls-12a', jenisKelamin: 'L' });
     setShowAddModal(false);
   };
 
@@ -648,7 +648,7 @@ export const AdminPengelolaan: React.FC<AdminPengelolaanProps> = ({
         const imported: StudentItem[] = data.map((item, idx) => {
           const rawClassStr = (item.Kelas || item.kelas || item.NamaKelas || '').toString().trim();
           const matchedClass = matchClass(rawClassStr, classes);
-          const classIdToUse = matchedClass ? matchedClass.id : (classes[0]?.id || 'cls-12ipa1');
+          const classIdToUse = matchedClass ? matchedClass.id : (classes[0]?.id || 'cls-12a');
 
           const rawJk = String(
             item.JenisKelamin || item['Jenis Kelamin'] || item.jenisKelamin || item['Jenis-Kelamin'] || item.JK || item.jk || item['L/P'] || item.LP || ''

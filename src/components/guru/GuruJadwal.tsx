@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ScheduleItem, User, SubjectItem, ClassItem, TeacherItem } from '../../types';
 import { Calendar, Clock, Filter } from 'lucide-react';
-import { sortSchedulesByJam } from '../../lib/matchUtils';
+import { sortSchedulesByJam, isTeacherMatch } from '../../lib/matchUtils';
 
 interface GuruJadwalProps {
   currentUser: User;
@@ -27,7 +27,8 @@ export const GuruJadwal: React.FC<GuruJadwalProps> = ({
 
   const mySchedules = schedules.filter((s) => {
     if (selectedGuruFilter === 'Semua') return true;
-    return s.guruId === selectedGuruFilter;
+    const targetFilter = selectedGuruFilter === currentUser.id ? currentUser : selectedGuruFilter;
+    return isTeacherMatch(s.guruId, targetFilter, teachers);
   });
 
   const hariList: ScheduleItem['hari'][] = ['Sabtu', 'Ahad', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat'];

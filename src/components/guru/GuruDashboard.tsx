@@ -2,7 +2,7 @@ import React from 'react';
 import { User, ScheduleItem, TeacherAttendance, TeachingJournal, Assessment, SubjectItem, ClassItem } from '../../types';
 import { getTodayString } from '../../lib/storage';
 import { canUserAccessAssessment } from '../../lib/assessmentUtils';
-import { sortSchedulesByJam } from '../../lib/matchUtils';
+import { sortSchedulesByJam, isTeacherMatch } from '../../lib/matchUtils';
 import { Clock, CalendarCheck, BookOpen, FileCheck, CheckCircle2, AlertCircle, ArrowRight } from 'lucide-react';
 
 interface GuruDashboardProps {
@@ -35,15 +35,15 @@ export const GuruDashboard: React.FC<GuruDashboardProps> = ({
 
   // Teacher's today schedule
   const todaySchedules = sortSchedulesByJam(
-    schedules.filter((s) => s.guruId === currentUser.id && s.hari === currentDayName)
+    schedules.filter((s) => isTeacherMatch(s.guruId, currentUser) && s.hari === currentDayName)
   );
 
   // Teacher's today attendance status
-  const myTeacherAttendances = teacherAttendances.filter((ta) => ta.guruId === currentUser.id);
+  const myTeacherAttendances = teacherAttendances.filter((ta) => isTeacherMatch(ta.guruId, currentUser));
   const myTodayAttendance = myTeacherAttendances.find((ta) => ta.tanggal === todayStr);
 
   // Teacher's today journal status (or teacher's journals if filter applies)
-  const myJournals = teachingJournals.filter((tj) => tj.guruId === currentUser.id);
+  const myJournals = teachingJournals.filter((tj) => isTeacherMatch(tj.guruId, currentUser));
   const myTodayJournals = myJournals.filter((tj) => tj.tanggal === todayStr);
   const displayJournalCount = myTodayJournals.length > 0 ? myTodayJournals.length : myJournals.length;
 

@@ -23,7 +23,7 @@ export const SiswaAsesmen: React.FC<SiswaAsesmenProps> = ({
   onStartExam,
 }) => {
   const [filterMode, setFilterMode] = useState<'kelas_saya' | 'semua'>('kelas_saya');
-  const myClassId = currentUser.kelasId || 'cls-12ipa1';
+  const myClassId = currentUser.kelasId || 'cls-12a';
   const myClassObj = classes.find((c) => c.id === myClassId);
 
   // Filter assessments based on access rules first

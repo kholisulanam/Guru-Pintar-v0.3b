@@ -25,7 +25,7 @@ async function startServer() {
     });
   };
 
-  // API Route for AI Question Generation
+// API Route for AI Question Generation
   app.post('/api/generate-questions', async (req, res) => {
     try {
       const { topic, mapelName, className, count = 5 } = req.body;
@@ -48,8 +48,7 @@ Persyaratan:
 4. Berikan bobot nilai (default 20 untuk setiap soal).
 5. Bahasa Indonesia yang baku dan baik.`;
 
-      const response = await ai.models.generateContent({
-        model: 'gemini-3.6-flash',
+      const requestConfig = {
         contents: prompt,
         config: {
           systemInstruction:
@@ -96,7 +95,58 @@ Persyaratan:
             },
           },
         },
-      });
+      };
+
+      // Candidate models for auto-failover in case of 503 high demand
+      const candidateModels = ['gemini-3.6-flash', 'gemini-3.1-flash-lite'];
+      let lastError: any = null;
+      let response: any = null;
+
+      for (const modelName of candidateModels) {
+        const maxRetries = 3;
+        for (let attempt = 1; attempt <= maxRetries; attempt++) {
+          try {
+            response = await ai.models.generateContent({
+              ...requestConfig,
+              model: modelName,
+            });
+            if (response && response.text) {
+              break;
+            }
+          } catch (err: any) {
+            lastError = err;
+            const errMsg = String(err?.message || err).toLowerCase();
+            const isHighDemandOrUnavailable =
+              err?.status === 503 ||
+              err?.code === 503 ||
+              errMsg.includes('503') ||
+              errMsg.includes('high demand') ||
+              errMsg.includes('unavailable') ||
+              errMsg.includes('overloaded') ||
+              errMsg.includes('try again later') ||
+              errMsg.includes('resource_exhausted') ||
+              errMsg.includes('rate limit') ||
+              errMsg.includes('429');
+
+            if (isHighDemandOrUnavailable && attempt < maxRetries) {
+              const backoffMs = attempt * 1200; // 1.2s, 2.4s
+              console.warn(`[Gemini AI] Model ${modelName} returned 503/High Demand (attempt ${attempt}/${maxRetries}). Retrying in ${backoffMs}ms...`);
+              await new Promise((resolve) => setTimeout(resolve, backoffMs));
+              continue;
+            }
+
+            console.warn(`[Gemini AI] Model ${modelName} failed on attempt ${attempt}: ${err?.message || err}`);
+            break; // Try next fallback model
+          }
+        }
+        if (response && response.text) {
+          break;
+        }
+      }
+
+      if (!response || !response.text) {
+        throw lastError || new Error('Gagal mendapatkan respon dari model AI.');
+      }
 
       const responseText = response.text || '[]';
       const questions = JSON.parse(responseText);
@@ -104,8 +154,20 @@ Persyaratan:
       return res.json({ success: true, questions });
     } catch (err: any) {
       console.error('Gemini Generation Error:', err);
-      return res.status(500).json({
-        error: err.message || 'Gagal menghasilkan soal otomatis menggunakan Gemini AI.',
+      const errMsg = String(err?.message || err).toLowerCase();
+      const isHighDemand =
+        err?.status === 503 ||
+        err?.code === 503 ||
+        errMsg.includes('503') ||
+        errMsg.includes('high demand') ||
+        errMsg.includes('unavailable');
+
+      const userFriendlyMsg = isHighDemand
+        ? 'Layanan Gemini AI sedang mengalami lonjakan trafik tinggi (High Demand). Sistem telah mencoba kembali secara otomatis namun server Google masih sibuk. Silakan coba klik "Buat Soal" lagi dalam beberapa detik.'
+        : (err.message || 'Gagal menghasilkan soal otomatis menggunakan Gemini AI.');
+
+      return res.status(503).json({
+        error: userFriendlyMsg,
       });
     }
   });

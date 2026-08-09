@@ -1,4 +1,5 @@
-import { Assessment, User, ScheduleItem, TeacherItem, SubjectItem } from '../types';
+import { Assessment, User, ScheduleItem, TeacherItem, SubjectItem, ClassItem } from '../types';
+import { isTeacherMatch, isClassMatch } from './matchUtils';
 
 /**
  * Checks if an assessment/soal is visible to a user according to the visibility rules:
@@ -13,6 +14,7 @@ export function canUserAccessAssessment(
     schedules?: ScheduleItem[];
     teachers?: TeacherItem[];
     subjects?: SubjectItem[];
+    classes?: ClassItem[];
   }
 ): boolean {
   if (!currentUser) return false;
@@ -30,10 +32,9 @@ export function canUserAccessAssessment(
     const userUsername = currentUser.username || '';
 
     // Check if creator
+    const teachers = extra?.teachers || [];
     const isCreator =
-      asm.guruId === userId ||
-      (userNuptk && asm.guruId === userNuptk) ||
-      (userName && asm.guruId === userName) ||
+      isTeacherMatch(asm.guruId, currentUser, teachers) ||
       (asm.createdBy && asm.createdBy === userId) ||
       (asm.createdBy && asm.createdBy === userUsername);
 
@@ -43,14 +44,13 @@ export function canUserAccessAssessment(
     const schedules = extra?.schedules || [];
     const isSubjectTeacherInSchedule = schedules.some(
       (s) =>
-        (s.guruId === userId || s.guruId === userNuptk || s.guruId === userUsername) &&
+        isTeacherMatch(s.guruId, currentUser, teachers) &&
         s.mapelId === asm.mapelId
     );
 
     if (isSubjectTeacherInSchedule) return true;
 
     // Check if teacher profile has matching mengajarMapel
-    const teachers = extra?.teachers || [];
     const teacherObj = teachers.find(
       (t) =>
         t.id === userId ||
@@ -87,12 +87,8 @@ export function canUserAccessAssessment(
 
     // Default: if targetSiswaIds is empty/undefined, visible to students in assigned class
     const studentClassId = currentUser.kelasId || '';
-    return (
-      asm.kelasId === studentClassId ||
-      asm.kelasId === 'semua' ||
-      asm.kelasId === 'all' ||
-      !asm.kelasId
-    );
+    if (!asm.kelasId || asm.kelasId === 'semua' || asm.kelasId === 'all') return true;
+    return isClassMatch(studentClassId, asm.kelasId, extra?.classes || []);
   }
 
   return false;

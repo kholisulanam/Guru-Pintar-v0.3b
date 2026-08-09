@@ -25,7 +25,7 @@ export const GuruPresensiSiswa: React.FC<GuruPresensiSiswaProps> = ({
 }) => {
   const todayStr = getTodayString();
 
-  const [selectedKelas, setSelectedKelas] = useState<string>(classes[0]?.id || 'cls-12ipa1');
+  const [selectedKelas, setSelectedKelas] = useState<string>(classes[0]?.id || 'cls-12a');
   const [tanggalInput, setTanggalInput] = useState<string>(todayStr);
   const [selectedJamKe, setSelectedJamKe] = useState<string>('07.00-07.40');
 

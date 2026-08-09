@@ -77,7 +77,7 @@ export const CbtExamModal: React.FC<CbtExamModalProps> = ({
       assessmentId: assessment.id,
       siswaId: student.id,
       siswaNama: student.name,
-      kelasId: student.kelasId || 'cls-12ipa1',
+      kelasId: student.kelasId || 'cls-12a',
       waktuSelesai: new Date().toISOString(),
       nilai: finalScore,
       jawabanDetail: answers,

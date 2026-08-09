@@ -43,7 +43,7 @@ export const SiswaDashboard: React.FC<SiswaDashboardProps> = ({
   const daysMap = ['Ahad', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
   const currentDayName = daysMap[new Date().getDay()];
 
-  const myClassId = currentUser.kelasId || 'cls-12ipa1';
+  const myClassId = currentUser.kelasId || 'cls-12a';
   const myClassObj = classes.find((c) => c.id === myClassId);
 
   // Today's schedule for student's class

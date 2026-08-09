@@ -54,7 +54,7 @@ export const AdminLaporan: React.FC<AdminLaporanProps> = ({
   const [modePeriode, setModePeriode] = useState<'harian' | 'bulanan'>('bulanan');
 
   // Filters
-  const [selectedKelas, setSelectedKelas] = useState<string>(classes[0]?.id || 'cls-12ipa1');
+  const [selectedKelas, setSelectedKelas] = useState<string>(classes[0]?.id || 'cls-12a');
   const [selectedBulan, setSelectedBulan] = useState<string>('2026-08');
   const [selectedTanggal, setSelectedTanggal] = useState<string>(getTodayString());
   const [selectedGuru, setSelectedGuru] = useState<string>(teachers[0]?.id || 'usr-guru1');

@@ -3,6 +3,7 @@ import { TeachingJournal, SchoolSettings, User, ClassItem, SubjectItem } from '.
 import { storageService, getTodayString } from '../../lib/storage';
 import { BookOpen, Plus, Trash2, FileSpreadsheet, Printer } from 'lucide-react';
 import { exportToExcel, exportToPdfReport } from '../../lib/exportUtils';
+import { isTeacherMatch } from '../../lib/matchUtils';
 import { KopSekolah } from '../common/KopSekolah';
 import { TandaTangan } from '../common/TandaTangan';
 
@@ -27,14 +28,14 @@ export const GuruJurnal: React.FC<GuruJurnalProps> = ({
 
   const [tanggal, setTanggal] = useState(todayStr);
   const [jamKe, setJamKe] = useState('08.30 - 10.00');
-  const [kelasId, setKelasId] = useState(classes[0]?.id || 'cls-12ipa1');
+  const [kelasId, setKelasId] = useState(classes[0]?.id || 'cls-12a');
   const [mapelId, setMapelId] = useState(subjects[0]?.id || 'sub-2');
   const [materi, setMateri] = useState('');
   const [catatanSiswa, setCatatanSiswa] = useState('');
 
-  const [filterKelas, setFilterKelas] = useState(classes[0]?.id || 'cls-12ipa1');
+  const [filterKelas, setFilterKelas] = useState(classes[0]?.id || 'cls-12a');
 
-  const myJournals = teachingJournals.filter((j) => j.guruId === currentUser.id);
+  const myJournals = teachingJournals.filter((j) => isTeacherMatch(j.guruId, currentUser));
   const filteredJournals = myJournals.filter((j) => j.kelasId === filterKelas);
 
   const handleAddJournal = (e: React.FormEvent) => {

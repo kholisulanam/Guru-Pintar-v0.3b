@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { Assessment, ClassItem, SubjectItem, TeacherItem, Question, User, StudentItem, ScheduleItem } from '../../types';
 import { canUserAccessAssessment } from '../../lib/assessmentUtils';
-import { FileCheck, Plus, Trash2, Power, Clock, HelpCircle, Sparkles, Bot, Wand2, Loader2, Check, Pencil, Eye, Save, X, RotateCcw, Users, UserCheck, ShieldCheck } from 'lucide-react';
+import { defaultStudents, defaultClasses } from '../../lib/initialData';
+import { isClassMatch } from '../../lib/matchUtils';
+import { FileCheck, Plus, Trash2, Power, Clock, HelpCircle, Sparkles, Bot, Wand2, Loader2, Check, Pencil, Eye, Save, X, RotateCcw, Users, UserCheck, ShieldCheck, Copy, Files } from 'lucide-react';
 
 interface AdminAsesmenProps {
   currentUser?: User;
@@ -37,6 +39,16 @@ export const AdminAsesmen: React.FC<AdminAsesmenProps> = ({
   // Target Siswa Fields (Rule: Murid yang dipilih untuk ujian)
   const [targetSiswaOption, setTargetSiswaOption] = useState<'semua' | 'terpilih'>('semua');
   const [selectedSiswaIds, setSelectedSiswaIds] = useState<string[]>([]);
+  const [studentFilterKelas, setStudentFilterKelas] = useState<string>('semua');
+
+  const activeClasses = (classes && classes.length > 0) ? classes : defaultClasses;
+  const activeStudents = (students && students.length > 0) ? students : defaultStudents;
+
+  const getClassName = (clsId: string) => {
+    if (!clsId || clsId === 'semua' || clsId === 'all') return 'Semua Kelas';
+    const found = activeClasses.find((c) => c.id === clsId) || activeClasses.find((c) => isClassMatch(clsId, c.id, activeClasses));
+    return found ? found.namaKelas : clsId;
+  };
 
   // Soal Builder List
   const [soalList, setSoalList] = useState<Question[]>([]);
@@ -60,20 +72,26 @@ export const AdminAsesmen: React.FC<AdminAsesmenProps> = ({
   const [aiError, setAiError] = useState<string | null>(null);
   const [aiPreviewQuestions, setAiPreviewQuestions] = useState<Question[]>([]);
 
+  // Import / Salin Soal dari Asesmen Lain
+  const [selectedSourceAsmId, setSelectedSourceAsmId] = useState<string>('');
+
   // Filter assessments based on user permission / visibility rules
   const visibleAssessments = assessments.filter((asm) =>
-    canUserAccessAssessment(asm, currentUser, { schedules, teachers, subjects })
+    canUserAccessAssessment(asm, currentUser, { schedules, teachers, subjects, classes: activeClasses })
   );
 
   const handleOpenCreateModal = () => {
+    const initialClassId = activeClasses[0]?.id || 'semua';
     setEditingAssessmentId(null);
     setJudul('');
-    setKelasId(classes[0]?.id || 'cls-12ipa1');
+    setKelasId(initialClassId);
     setMapelId(subjects[0]?.id || 'sub-1');
     setGuruId(currentUser?.role === 'guru' ? currentUser.id : teachers[0]?.id || 'usr-guru1');
     setLamaUjianMenit(30);
     setTargetSiswaOption('semua');
     setSelectedSiswaIds([]);
+    setStudentFilterKelas(initialClassId);
+    setSelectedSourceAsmId('');
     setSoalList([
       {
         id: `q-init-${Date.now()}`,
@@ -108,6 +126,8 @@ export const AdminAsesmen: React.FC<AdminAsesmenProps> = ({
       setTargetSiswaOption('semua');
       setSelectedSiswaIds([]);
     }
+    setStudentFilterKelas(asm.kelasId || 'semua');
+    setSelectedSourceAsmId('');
     resetQuestionDraft();
     setShowCreateModal(true);
   };
@@ -121,6 +141,61 @@ export const AdminAsesmen: React.FC<AdminAsesmenProps> = ({
     setDraftOpsiD('');
     setDraftOpsiE('');
     setDraftKunci('A');
+  };
+
+  const handleDuplicateQuestionFromList = (q: Question, idx: number) => {
+    const dup: Question = {
+      ...q,
+      id: `q-dup-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+      pertanyaan: `${q.pertanyaan} (Salinan)`,
+      opsi: q.opsi.map((o) => ({ ...o })),
+    };
+    setSoalList((prev) => {
+      const next = [...prev];
+      next.splice(idx + 1, 0, dup);
+      return next;
+    });
+  };
+
+  const handleDuplicateAssessment = (asm: Assessment) => {
+    const newSoalList: Question[] = asm.soalList.map((q, idx) => ({
+      ...q,
+      id: `q-dup-${Date.now()}-${idx}-${Math.random().toString(36).substring(2, 5)}`,
+      opsi: q.opsi.map((o) => ({ ...o })),
+    }));
+
+    const duplicated: Assessment = {
+      ...asm,
+      id: `asm-${Date.now()}`,
+      judul: `${asm.judul} (Salinan)`,
+      waktuMulai: new Date().toISOString().slice(0, 16).replace('T', ' '),
+      soalList: newSoalList,
+      jumlahSoal: newSoalList.length,
+      createdBy: currentUser?.id || currentUser?.username || asm.createdBy || 'usr-guru1',
+      aktif: false,
+    };
+
+    setAssessments((prev) => [duplicated, ...prev]);
+    alert(`Asesmen "${asm.judul}" berhasil disalin beserta ${newSoalList.length} soalnya!`);
+  };
+
+  const handleCopyQuestionsFromOtherAssessment = (sourceAsmId: string) => {
+    if (!sourceAsmId) return;
+    const sourceAsm = assessments.find((a) => a.id === sourceAsmId);
+    if (!sourceAsm || sourceAsm.soalList.length === 0) {
+      alert('Asesmen pilihan tidak memiliki soal.');
+      return;
+    }
+
+    const copiedSoal: Question[] = sourceAsm.soalList.map((q, idx) => ({
+      ...q,
+      id: `q-copied-${Date.now()}-${idx}-${Math.random().toString(36).substring(2, 5)}`,
+      opsi: q.opsi.map((o) => ({ ...o })),
+    }));
+
+    setSoalList((prev) => [...prev, ...copiedSoal]);
+    alert(`${copiedSoal.length} Soal berhasil disalin dari "${sourceAsm.judul}" ke daftar soal saat ini!`);
+    setSelectedSourceAsmId('');
   };
 
   const handleEditQuestionInList = (q: Question) => {
@@ -414,13 +489,22 @@ export const AdminAsesmen: React.FC<AdminAsesmenProps> = ({
                   </div>
                 </div>
 
-              <div className="pt-4 border-t border-slate-800 flex items-center justify-between gap-2">
-                <button
-                  onClick={() => handleOpenEditModal(asm)}
-                  className="px-3 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition border border-indigo-400/40"
-                >
-                  <Pencil className="w-3.5 h-3.5" /> Lihat / Edit Asesmen
-                </button>
+              <div className="pt-4 border-t border-slate-800 flex flex-wrap items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => handleOpenEditModal(asm)}
+                    className="px-3 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition border border-indigo-400/40"
+                  >
+                    <Pencil className="w-3.5 h-3.5" /> Lihat / Edit Asesmen
+                  </button>
+                  <button
+                    onClick={() => handleDuplicateAssessment(asm)}
+                    className="px-3 py-2 bg-cyan-950 text-cyan-300 hover:bg-cyan-900 border border-cyan-800 rounded-xl text-xs font-bold flex items-center gap-1.5 transition"
+                    title="Salin/Duplikat Asesmen Ini & Seluruh Soalnya"
+                  >
+                    <Copy className="w-3.5 h-3.5" /> Salin Asesmen
+                  </button>
+                </div>
 
                 <div className="flex items-center gap-2">
                   <button
@@ -519,11 +603,15 @@ export const AdminAsesmen: React.FC<AdminAsesmenProps> = ({
                   <label className="block font-bold text-slate-300 mb-1">Pilih Kelas Target</label>
                   <select
                     value={kelasId}
-                    onChange={(e) => setKelasId(e.target.value)}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setKelasId(val);
+                      setStudentFilterKelas(val);
+                    }}
                     className="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-slate-100 focus:ring-1 focus:ring-emerald-500"
                   >
                     <option value="semua">🌟 Semua Kelas (Seluruh Siswa)</option>
-                    {classes.map((c) => (
+                    {activeClasses.map((c) => (
                       <option key={c.id} value={c.id}>
                         {c.namaKelas}
                       </option>
@@ -584,20 +672,88 @@ export const AdminAsesmen: React.FC<AdminAsesmenProps> = ({
                   </div>
                 </div>
 
-                {targetSiswaOption === 'terpilih' && (
+                {targetSiswaOption === 'semua' && (
                   <div className="pt-2 border-t border-slate-800/80 space-y-2">
                     <div className="flex items-center justify-between">
                       <span className="text-[11px] font-bold text-slate-300">
-                        Pilih Murid {kelasId === 'semua' ? 'Semua Kelas' : `Kelas ${classes.find((c) => c.id === kelasId)?.namaKelas || ''}`}:
+                        Daftar Murid Peserta Ujian ({
+                          activeStudents.filter((s) => kelasId === 'semua' || isClassMatch(s.kelasId, kelasId, activeClasses)).length
+                        } Murid):
                       </span>
+                      <span className="text-[10px] text-emerald-400 bg-emerald-950/60 border border-emerald-800 px-2.5 py-0.5 rounded-full font-semibold">
+                        Otomatis Semua Murid di {getClassName(kelasId)}
+                      </span>
+                    </div>
+
+                    <div className="max-h-48 overflow-y-auto grid grid-cols-1 sm:grid-cols-2 gap-2 p-2 bg-slate-900/90 rounded-xl border border-slate-800 text-xs">
+                      {(() => {
+                        const classStudents = activeStudents.filter(
+                          (s) => kelasId === 'semua' || isClassMatch(s.kelasId, kelasId, activeClasses)
+                        );
+                        if (classStudents.length === 0) {
+                          return (
+                            <div className="p-3 bg-slate-950 rounded-lg text-center col-span-2">
+                              <p className="text-slate-400 italic text-[11px]">
+                                Belum ada murid terdaftar di {getClassName(kelasId)}.
+                              </p>
+                            </div>
+                          );
+                        }
+                        return classStudents.map((student) => {
+                          const clsName = getClassName(student.kelasId);
+                          return (
+                            <div
+                              key={student.id}
+                              className="flex items-center justify-between p-2 rounded-xl bg-slate-950 border border-slate-800/80 text-slate-300"
+                            >
+                              <div className="overflow-hidden min-w-0 pr-2">
+                                <p className="font-semibold truncate text-[11px] text-white">{student.nama}</p>
+                                <p className="text-[10px] text-slate-400">NISN: {student.nisn || student.id}</p>
+                              </div>
+                              <span className="text-[10px] text-indigo-300 font-medium bg-indigo-950/60 border border-indigo-800/50 px-1.5 py-0.5 rounded shrink-0">
+                                {clsName}
+                              </span>
+                            </div>
+                          );
+                        });
+                      })()}
+                    </div>
+                  </div>
+                )}
+
+                {targetSiswaOption === 'terpilih' && (
+                  <div className="pt-2 border-t border-slate-800/80 space-y-2">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <div className="flex items-center gap-2">
+                        <span className="text-[11px] font-bold text-slate-300">
+                          Filter Kelas:
+                        </span>
+                        <select
+                          value={studentFilterKelas}
+                          onChange={(e) => setStudentFilterKelas(e.target.value)}
+                          className="bg-slate-900 border border-slate-700 text-slate-200 text-xs rounded-lg px-2 py-1 focus:ring-1 focus:ring-indigo-500"
+                        >
+                          <option value="semua">Semua Kelas ({activeStudents.length} murid)</option>
+                          {activeClasses.map((cls) => {
+                            const count = activeStudents.filter((s) => isClassMatch(s.kelasId, cls.id, activeClasses)).length;
+                            return (
+                              <option key={cls.id} value={cls.id}>
+                                {cls.namaKelas} ({count} murid)
+                              </option>
+                            );
+                          })}
+                        </select>
+                      </div>
+
                       <div className="flex items-center gap-2">
                         <button
                           type="button"
                           onClick={() => {
-                            const classStudents = (students || []).filter(
-                              (s) => kelasId === 'semua' || s.kelasId === kelasId
+                            const classStudents = activeStudents.filter(
+                              (s) => studentFilterKelas === 'semua' || isClassMatch(s.kelasId, studentFilterKelas, activeClasses)
                             );
-                            setSelectedSiswaIds(classStudents.map((s) => s.id));
+                            const newIds = Array.from(new Set([...selectedSiswaIds, ...classStudents.map((s) => s.id)]));
+                            setSelectedSiswaIds(newIds);
                           }}
                           className="text-[10px] text-indigo-400 hover:underline font-semibold"
                         >
@@ -614,16 +770,36 @@ export const AdminAsesmen: React.FC<AdminAsesmenProps> = ({
                       </div>
                     </div>
 
-                    <div className="max-h-48 overflow-y-auto grid grid-cols-1 sm:grid-cols-2 gap-2 p-2 bg-slate-900/90 rounded-xl border border-slate-800 text-xs">
-                      {((students || []).filter((s) => kelasId === 'semua' || s.kelasId === kelasId)).length === 0 ? (
-                        <p className="text-slate-500 italic text-[11px] col-span-2 text-center py-2">
-                          Tidak ada data murid terdaftar untuk kelas ini.
-                        </p>
-                      ) : (
-                        (students || [])
-                          .filter((s) => kelasId === 'semua' || s.kelasId === kelasId)
-                          .map((student) => {
-                            const isChecked = selectedSiswaIds.includes(student.id);
+                    {(() => {
+                      const displayList = activeStudents.filter(
+                        (s) => studentFilterKelas === 'semua' || isClassMatch(s.kelasId, studentFilterKelas, activeClasses)
+                      );
+
+                      if (displayList.length === 0) {
+                        return (
+                          <div className="p-4 bg-slate-900/90 rounded-xl border border-slate-800 text-center space-y-2">
+                            <p className="text-slate-400 italic text-[11px]">
+                              Tidak ada data murid terdaftar untuk filter kelas ini.
+                            </p>
+                            <button
+                              type="button"
+                              onClick={() => setStudentFilterKelas('semua')}
+                              className="px-3 py-1 bg-indigo-600/80 hover:bg-indigo-600 text-white rounded-lg text-[11px] font-semibold transition"
+                            >
+                              Tampilkan Semua Kelas ({activeStudents.length} Murid)
+                            </button>
+                          </div>
+                        );
+                      }
+
+                      return (
+                        <div className="max-h-48 overflow-y-auto grid grid-cols-1 sm:grid-cols-2 gap-2 p-2 bg-slate-900/90 rounded-xl border border-slate-800 text-xs">
+                          {displayList.map((student) => {
+                            const isChecked = selectedSiswaIds.some(
+                              (id) => id === student.id || (student.nisn && id === student.nisn)
+                            );
+                            const clsName = getClassName(student.kelasId);
+
                             return (
                               <label
                                 key={student.id}
@@ -638,22 +814,28 @@ export const AdminAsesmen: React.FC<AdminAsesmenProps> = ({
                                   checked={isChecked}
                                   onChange={(e) => {
                                     if (e.target.checked) {
-                                      setSelectedSiswaIds((prev) => [...prev, student.id]);
+                                      setSelectedSiswaIds((prev) => Array.from(new Set([...prev, student.id])));
                                     } else {
-                                      setSelectedSiswaIds((prev) => prev.filter((id) => id !== student.id));
+                                      setSelectedSiswaIds((prev) =>
+                                        prev.filter((id) => id !== student.id && id !== student.nisn)
+                                      );
                                     }
                                   }}
                                   className="rounded text-indigo-600 focus:ring-indigo-500 bg-slate-900 border-slate-700"
                                 />
-                                <div className="overflow-hidden text-left">
+                                <div className="overflow-hidden text-left flex-1 min-w-0">
                                   <p className="font-semibold truncate text-[11px]">{student.nama}</p>
-                                  <p className="text-[10px] text-slate-400">NISN: {student.nisn || student.id}</p>
+                                  <div className="flex items-center justify-between text-[10px] text-slate-400">
+                                    <span>NISN: {student.nisn || student.id}</span>
+                                    <span className="text-indigo-300 font-medium bg-indigo-950/50 px-1.5 py-0.5 rounded">{clsName}</span>
+                                  </div>
                                 </div>
                               </label>
                             );
-                          })
-                      )}
-                    </div>
+                          })}
+                        </div>
+                      );
+                    })()}
                   </div>
                 )}
               </div>
@@ -695,6 +877,14 @@ export const AdminAsesmen: React.FC<AdminAsesmenProps> = ({
                               {idx + 1}. {q.pertanyaan}
                             </p>
                             <div className="flex items-center gap-1 flex-shrink-0">
+                              <button
+                                type="button"
+                                onClick={() => handleDuplicateQuestionFromList(q, idx)}
+                                className="px-2 py-1 bg-cyan-900/60 hover:bg-cyan-800 text-cyan-200 border border-cyan-700 rounded text-[10px] font-bold flex items-center gap-1 transition"
+                                title="Salin / Duplikat Soal Ini"
+                              >
+                                <Copy className="w-3 h-3" /> Salin Soal
+                              </button>
                               <button
                                 type="button"
                                 onClick={() => handleEditQuestionInList(q)}
@@ -739,6 +929,38 @@ export const AdminAsesmen: React.FC<AdminAsesmenProps> = ({
                     })}
                   </div>
                 )}
+
+                {/* Salin Soal dari Asesmen Lain */}
+                <div className="pt-3 border-t border-slate-800/80 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2">
+                  <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-300">
+                    <Files className="w-3.5 h-3.5 text-cyan-400 flex-shrink-0" />
+                    <span>Salin Soal Dari Asesmen Lain:</span>
+                  </div>
+                  <div className="flex items-center gap-2 flex-1 sm:flex-initial">
+                    <select
+                      value={selectedSourceAsmId}
+                      onChange={(e) => setSelectedSourceAsmId(e.target.value)}
+                      className="bg-slate-900 border border-slate-800 rounded-xl px-2.5 py-1.5 text-xs text-slate-200 focus:ring-1 focus:ring-cyan-500 flex-1 sm:w-64"
+                    >
+                      <option value="">-- Pilih Asesmen Sumber --</option>
+                      {assessments
+                        .filter((a) => a.id !== editingAssessmentId && a.soalList && a.soalList.length > 0)
+                        .map((a) => (
+                          <option key={a.id} value={a.id}>
+                            {a.judul} ({a.soalList.length} Soal)
+                          </option>
+                        ))}
+                    </select>
+                    <button
+                      type="button"
+                      disabled={!selectedSourceAsmId}
+                      onClick={() => handleCopyQuestionsFromOtherAssessment(selectedSourceAsmId)}
+                      className="px-3 py-1.5 bg-cyan-600 hover:bg-cyan-500 disabled:opacity-40 disabled:cursor-not-allowed text-white text-xs font-bold rounded-xl transition flex items-center gap-1 flex-shrink-0"
+                    >
+                      <Copy className="w-3.5 h-3.5" /> Salin Soal
+                    </button>
+                  </div>
+                </div>
               </div>
 
               {/* Input & Edit Form Soal Pilihan Ganda 5 Opsi */}

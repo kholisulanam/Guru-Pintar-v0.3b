@@ -3,7 +3,7 @@ import { ScheduleItem, TeacherItem, SubjectItem, ClassItem } from '../../types';
 import { Calendar, Plus, Trash2, Edit, Download, Upload, Filter, Clock, CheckCircle2, Check, X } from 'lucide-react';
 import { exportToExcel } from '../../lib/exportUtils';
 import { storageService } from '../../lib/storage';
-import { matchTeacher, matchSubject, matchClass, cleanStr, sortSchedulesByJam } from '../../lib/matchUtils';
+import { matchTeacher, matchSubject, matchClass, cleanStr, sortSchedulesByJam, isTeacherMatch } from '../../lib/matchUtils';
 import * as XLSX from 'xlsx';
 
 interface AdminJadwalProps {
@@ -190,7 +190,7 @@ export const AdminJadwal: React.FC<AdminJadwalProps> = ({
             id: `sch-imp-${Date.now()}-${idx}-${Math.random().toString(36).substring(2, 5)}`,
             hari: validHari,
             jamKe: rawJam,
-            kelasId: matchedClass?.id || rawKelas || curClasses[0]?.id || 'cls-12ipa1',
+            kelasId: matchedClass?.id || rawKelas || curClasses[0]?.id || 'cls-12a',
             guruId: matchedGuru?.id || rawGuru || curTeachers[0]?.id || 'usr-guru1',
             mapelId: matchedMapel?.id || rawMapel || curSubjects[0]?.id || 'sub-1',
           };
@@ -231,7 +231,7 @@ export const AdminJadwal: React.FC<AdminJadwalProps> = ({
     schedules.filter((s) => {
       const matchHari = selectedHariFilter === 'Semua' || s.hari === selectedHariFilter;
       const matchKelas = selectedKelasFilter === 'Semua' || s.kelasId === selectedKelasFilter;
-      const matchGuru = selectedGuruFilter === 'Semua' || s.guruId === selectedGuruFilter;
+      const matchGuru = selectedGuruFilter === 'Semua' || isTeacherMatch(s.guruId, selectedGuruFilter, teachers);
       return matchHari && matchKelas && matchGuru;
     })
   );

@@ -4,6 +4,7 @@ import { storageService, getTodayString } from '../../lib/storage';
 import { GeoLocationBadge } from '../common/GeoLocationBadge';
 import { CameraCapture } from '../common/CameraCapture';
 import { UserCheck, CheckCircle2, Clock, LogOut, AlertCircle } from 'lucide-react';
+import { isTeacherMatch } from '../../lib/matchUtils';
 
 interface GuruPresensiProps {
   currentUser: User;
@@ -27,7 +28,7 @@ export const GuruPresensi: React.FC<GuruPresensiProps> = ({
   const [catatan, setCatatan] = useState('');
 
   const myTodayAttendance = teacherAttendances.find(
-    (ta) => ta.guruId === currentUser.id && ta.tanggal === todayStr
+    (ta) => isTeacherMatch(ta.guruId, currentUser) && ta.tanggal === todayStr
   );
 
   const handleLocationUpdate = (lat: number, lng: number, within: boolean) => {

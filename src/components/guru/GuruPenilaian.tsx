@@ -24,7 +24,7 @@ export const GuruPenilaian: React.FC<GuruPenilaianProps> = ({
   gradeRecords,
   setGradeRecords,
 }) => {
-  const [selectedKelas, setSelectedKelas] = useState<string>(classes[0]?.id || 'cls-12ipa1');
+  const [selectedKelas, setSelectedKelas] = useState<string>(classes[0]?.id || 'cls-12a');
   const [selectedMapel, setSelectedMapel] = useState<string>(subjects[0]?.id || 'sub-2');
 
   const classStudents = students.filter((s) => s.kelasId === selectedKelas);

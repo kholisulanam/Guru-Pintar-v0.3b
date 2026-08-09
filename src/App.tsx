@@ -92,23 +92,47 @@ import { SiswaPengumuman } from './components/siswa/SiswaPengumuman';
 // CBT Exam Modal
 import { CbtExamModal } from './components/cbt/CbtExamModal';
 
+const LEGACY_CLASS_IDS = new Set(['cls-10ipa1', 'cls-11ipa1', 'cls-12ipa1', 'cls-12ips1']);
+const LEGACY_CLASS_NAMES = new Set([
+  'x ipa 1', 'xi ipa 1', 'xii ipa 1', 'xii ips 1', 'x ips 1',
+  'kelas x ipa 1', 'kelas xi ipa 1', 'kelas xii ipa 1', 'kelas xii ips 1', 'kelas x ips 1'
+]);
+
+function remapLegacyClassId(id: string | undefined): string {
+  if (!id) return 'cls-10a';
+  const clean = id.trim().toLowerCase().replace(/[^a-z0-9]/g, '');
+  if (id === 'cls-10ipa1' || clean === '10ipa1' || clean === 'xipa1' || clean === 'xips1') return 'cls-10a';
+  if (id === 'cls-11ipa1' || clean === '11ipa1' || clean === 'xiipa1') return 'cls-11a';
+  if (id === 'cls-12ipa1' || clean === '12ipa1' || clean === 'xiiipa1') return 'cls-12a';
+  if (id === 'cls-12ips1' || clean === '12ips1' || clean === 'xiiips1') return 'cls-12c';
+  return id;
+}
+
 export default function App() {
   // Global State initialized with local storage fallback
   const [users, setUsers] = useState<User[]>(() => {
     const loaded = storageService.get<User[]>('users', defaultUsers);
     const baseList = Array.isArray(loaded) ? loaded : defaultUsers;
     return baseList.map((u) => {
-      if (u.role === 'siswa' && !u.password) return { ...u, password: u.username || '12345678' };
-      if (u.role === 'admin' && (u.password === 'admin123' || u.password === 'admin2026' || !u.password)) {
-        return { ...u, password: 'admin#123' };
+      let updated = u;
+      if (u.kelasId) {
+        updated = { ...updated, kelasId: remapLegacyClassId(u.kelasId) };
       }
-      return u;
+      if (u.role === 'siswa' && !updated.password) updated = { ...updated, password: updated.username || '12345678' };
+      if (u.role === 'admin' && (updated.password === 'admin123' || updated.password === 'admin2026' || !updated.password)) {
+        updated = { ...updated, password: 'admin#123' };
+      }
+      return updated;
     });
   });
 
-  const [currentUser, setCurrentUser] = useState<User>(() =>
-    storageService.get('currentUser', users[0] || defaultUsers[0])
-  );
+  const [currentUser, setCurrentUser] = useState<User>(() => {
+    const stored = storageService.get<User>('currentUser', users[0] || defaultUsers[0]);
+    if (stored && stored.kelasId) {
+      return { ...stored, kelasId: remapLegacyClassId(stored.kelasId) };
+    }
+    return stored || defaultUsers[0];
+  });
 
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(() =>
     storageService.get('isLoggedIn', false)
@@ -124,29 +148,46 @@ export default function App() {
     storageService.get('teachers', defaultTeachers)
   );
 
-  const [students, setStudents] = useState<StudentItem[]>(() =>
-    storageService.get('students', defaultStudents)
-  );
+  const [classes, setClasses] = useState<ClassItem[]>(() => {
+    const stored = storageService.get<ClassItem[]>('classes', defaultClasses);
+    const filtered = stored.filter(
+      (c) => !LEGACY_CLASS_IDS.has(c.id) && !LEGACY_CLASS_NAMES.has(c.namaKelas.toLowerCase().trim())
+    );
+    return filtered.length > 0 ? filtered : defaultClasses;
+  });
 
-  const [classes, setClasses] = useState<ClassItem[]>(() =>
-    storageService.get('classes', defaultClasses)
-  );
+  const [students, setStudents] = useState<StudentItem[]>(() => {
+    const stored = storageService.get<StudentItem[]>('students', defaultStudents);
+    const remapped = stored.map((s) => ({
+      ...s,
+      kelasId: remapLegacyClassId(s.kelasId),
+    }));
+    return remapped;
+  });
 
   const [subjects, setSubjects] = useState<SubjectItem[]>(() =>
     storageService.get('subjects', defaultSubjects)
   );
 
-  const [schedules, setSchedules] = useState<ScheduleItem[]>(() =>
-    storageService.get('schedules', defaultSchedules)
-  );
+  const [schedules, setSchedules] = useState<ScheduleItem[]>(() => {
+    const stored = storageService.get<ScheduleItem[]>('schedules', defaultSchedules);
+    return stored.map((sch) => ({
+      ...sch,
+      kelasId: remapLegacyClassId(sch.kelasId),
+    }));
+  });
 
   const [announcements, setAnnouncements] = useState<Announcement[]>(() =>
     storageService.get('announcements', defaultAnnouncements)
   );
 
-  const [assessments, setAssessments] = useState<Assessment[]>(() =>
-    storageService.get('assessments', defaultAssessments)
-  );
+  const [assessments, setAssessments] = useState<Assessment[]>(() => {
+    const stored = storageService.get<Assessment[]>('assessments', defaultAssessments);
+    return stored.map((a) => ({
+      ...a,
+      kelasId: remapLegacyClassId(a.kelasId),
+    }));
+  });
 
   const [submissions, setSubmissions] = useState<AssessmentSubmission[]>(() =>
     storageService.get('submissions', [])
@@ -164,13 +205,21 @@ export default function App() {
     return list.filter((ta) => ta.tanggal !== todayStr);
   });
 
-  const [teachingJournals, setTeachingJournals] = useState<TeachingJournal[]>(() =>
-    storageService.get('teachingJournals', defaultTeachingJournals)
-  );
+  const [teachingJournals, setTeachingJournals] = useState<TeachingJournal[]>(() => {
+    const stored = storageService.get<TeachingJournal[]>('teachingJournals', defaultTeachingJournals);
+    return stored.map((tj) => ({
+      ...tj,
+      kelasId: remapLegacyClassId(tj.kelasId),
+    }));
+  });
 
-  const [gradeRecords, setGradeRecords] = useState<GradeRecord[]>(() =>
-    storageService.get('gradeRecords', defaultGradeRecords)
-  );
+  const [gradeRecords, setGradeRecords] = useState<GradeRecord[]>(() => {
+    const stored = storageService.get<GradeRecord[]>('gradeRecords', defaultGradeRecords);
+    return stored.map((gr) => ({
+      ...gr,
+      kelasId: remapLegacyClassId(gr.kelasId),
+    }));
+  });
 
   const [libraryBooks, setLibraryBooks] = useState<LibraryBook[]>(() =>
     storageService.get('libraryBooks', defaultLibraryBooks)
