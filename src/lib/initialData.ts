@@ -1,0 +1,474 @@
+import {
+  SchoolSettings,
+  TeacherItem,
+  StudentItem,
+  ClassItem,
+  SubjectItem,
+  ScheduleItem,
+  Announcement,
+  Assessment,
+  TeacherAttendance,
+  StudentAttendance,
+  TeachingJournal,
+  GradeRecord,
+  LibraryBook,
+  User,
+  CalendarEvent
+} from '../types';
+
+export const defaultSettings: SchoolSettings = {
+  namaSekolah: 'MAS AL-AMIEN I PRAGAAN',
+  alamat: 'Jl. Pamekasan-Sumenep No. 2A Prenduan Pragaan Sumenep',
+  kodePos: '69465',
+  kepalaSekolah: 'SYAIFUDIN KUDSI, SHI. MA.',
+  tahunAkademik: '2026/2027',
+  semester: 'Ganjil',
+  logoUrl: '/logo.png',
+  latitude: -7.108657,
+  longitude: 113.669191,
+  radiusMeters: 100,
+};
+
+export const defaultUsers: User[] = [
+  {
+    id: 'usr-admin',
+    username: 'admin',
+    password: 'admin#123',
+    name: 'Administrator Madrasah',
+    role: 'admin',
+    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80',
+    status: 'Aktif',
+  },
+];
+
+export const defaultTeachers: TeacherItem[] = [
+  {
+    id: 'usr-guru1',
+    nama: 'SYAIFUDIN KUDSI, SHI. MA.',
+    nuptk: '197805122005011002',
+    mengajarMapel: 'Fiqih & Usul Fiqih',
+    email: 'syaifudin@al-amien.sch.id',
+    telepon: '081234567890',
+    status: 'Aktif',
+  },
+  {
+    id: 'usr-guru2',
+    nama: 'AHMAD ZAINI, S.Pd.I',
+    nuptk: '198203152009021005',
+    mengajarMapel: 'Bahasa Arab & Al-Qur\'an Hadits',
+    email: 'zaini@al-amien.sch.id',
+    telepon: '081234567891',
+    status: 'Aktif',
+  },
+  {
+    id: 'guru-3',
+    nama: 'NURUL HIDAYATI, M.Pd.',
+    nuptk: '198507202011012003',
+    mengajarMapel: 'Matematika Peminatan',
+    email: 'nurul@al-amien.sch.id',
+    telepon: '081234567892',
+    status: 'Aktif',
+  },
+  {
+    id: 'guru-4',
+    nama: 'MOHAMMAD RIFQI, S.Si.',
+    nuptk: '199011052018031001',
+    mengajarMapel: 'Fisika & Kimia',
+    email: 'rifqi@al-amien.sch.id',
+    telepon: '081234567893',
+    status: 'Aktif',
+  },
+];
+
+export const defaultClasses: ClassItem[] = [
+  { id: 'cls-10ipa1', namaKelas: 'X IPA 1', waliKelas: 'NURUL HIDAYATI, M.Pd.', jumlahSiswa: 32 },
+  { id: 'cls-11ipa1', namaKelas: 'XI IPA 1', waliKelas: 'MOHAMMAD RIFQI, S.Si.', jumlahSiswa: 30 },
+  { id: 'cls-12ipa1', namaKelas: 'XII IPA 1', waliKelas: 'AHMAD ZAINI, S.Pd.I', jumlahSiswa: 34 },
+  { id: 'cls-12ips1', namaKelas: 'XII IPS 1', waliKelas: 'SYAIFUDIN KUDSI, SHI. MA.', jumlahSiswa: 28 },
+];
+
+export const defaultStudents: StudentItem[] = [
+  {
+    id: 'usr-siswa1',
+    nama: 'Ahmad Farisi Subakti',
+    nisn: '0051234567',
+    ttl: 'Sumenep, 14 Mei 2006',
+    kelasId: 'cls-12ipa1',
+    jenisKelamin: 'L',
+    status: 'Aktif',
+  },
+  {
+    id: 'usr-siswa2',
+    nama: 'Siti Fatimah Az-Zahra',
+    nisn: '0059876543',
+    ttl: 'Pamekasan, 22 Agustus 2006',
+    kelasId: 'cls-12ipa1',
+    jenisKelamin: 'P',
+    status: 'Aktif',
+  },
+  {
+    id: 'sis-3',
+    nama: 'Mohammad Alif Pratama',
+    nisn: '0058881234',
+    ttl: 'Sumenep, 02 Januari 2006',
+    kelasId: 'cls-12ipa1',
+    jenisKelamin: 'L',
+    status: 'Aktif',
+  },
+  {
+    id: 'sis-4',
+    nama: 'Nabila Nur Aini',
+    nisn: '0057774321',
+    ttl: 'Surabaya, 11 November 2006',
+    kelasId: 'cls-12ipa1',
+    jenisKelamin: 'P',
+    status: 'Aktif',
+  },
+  {
+    id: 'sis-5',
+    nama: 'Badrus Sholeh',
+    nisn: '0061122334',
+    ttl: 'Pragaan Sumenep, 09 April 2007',
+    kelasId: 'cls-11ipa1',
+    jenisKelamin: 'L',
+    status: 'Aktif',
+  },
+];
+
+export const defaultSubjects: SubjectItem[] = [
+  { id: 'sub-1', kode: 'MA-01', namaMapel: 'Al-Qur\'an Hadits', kelompok: 'Wajib' },
+  { id: 'sub-2', kode: 'MA-02', namaMapel: 'Fiqih & Usul Fiqih', kelompok: 'Wajib' },
+  { id: 'sub-3', kode: 'MA-03', namaMapel: 'Bahasa Arab', kelompok: 'Wajib' },
+  { id: 'sub-4', kode: 'MA-04', namaMapel: 'Matematika Peminatan', kelompok: 'Peminatan' },
+  { id: 'sub-5', kode: 'MA-05', namaMapel: 'Fisika Terapan', kelompok: 'Peminatan' },
+  { id: 'sub-6', kode: 'MA-06', namaMapel: 'Keagamaan / Kitab Kuning', kelompok: 'Muatan Lokal' },
+];
+
+export const defaultSchedules: ScheduleItem[] = [
+  // Ahad
+  { id: 'sch-1', hari: 'Ahad', jamKe: '07.00 - 08.00', kelasId: 'cls-12ipa1', guruId: 'usr-guru1', mapelId: 'sub-6' },
+  { id: 'sch-2', hari: 'Ahad', jamKe: '08.00 - 09.30', kelasId: 'cls-11ipa1', guruId: 'usr-guru2', mapelId: 'sub-1' },
+  { id: 'sch-3', hari: 'Ahad', jamKe: '09.30 - 11.00', kelasId: 'cls-10ipa1', guruId: 'guru-3', mapelId: 'sub-4' },
+
+  // Senin
+  { id: 'sch-4', hari: 'Senin', jamKe: '07.00 - 08.30', kelasId: 'cls-12ipa1', guruId: 'usr-guru2', mapelId: 'sub-3' },
+  { id: 'sch-5', hari: 'Senin', jamKe: '08.30 - 10.00', kelasId: 'cls-12ipa1', guruId: 'usr-guru1', mapelId: 'sub-2' },
+  { id: 'sch-6', hari: 'Senin', jamKe: '10.00 - 11.30', kelasId: 'cls-11ipa1', guruId: 'guru-3', mapelId: 'sub-4' },
+
+  // Selasa
+  { id: 'sch-7', hari: 'Selasa', jamKe: '07.00 - 08.30', kelasId: 'cls-12ipa1', guruId: 'guru-3', mapelId: 'sub-4' },
+  { id: 'sch-8', hari: 'Selasa', jamKe: '08.30 - 10.00', kelasId: 'cls-11ipa1', guruId: 'guru-4', mapelId: 'sub-5' },
+  { id: 'sch-9', hari: 'Selasa', jamKe: '10.00 - 11.30', kelasId: 'cls-10ipa1', guruId: 'usr-guru1', mapelId: 'sub-2' },
+
+  // Rabu
+  { id: 'sch-10', hari: 'Rabu', jamKe: '07.00 - 08.30', kelasId: 'cls-12ips1', guruId: 'usr-guru2', mapelId: 'sub-1' },
+  { id: 'sch-11', hari: 'Rabu', jamKe: '08.30 - 10.00', kelasId: 'cls-12ipa1', guruId: 'guru-4', mapelId: 'sub-5' },
+  { id: 'sch-12', hari: 'Rabu', jamKe: '10.00 - 11.30', kelasId: 'cls-11ipa1', guruId: 'usr-guru2', mapelId: 'sub-3' },
+
+  // Kamis
+  { id: 'sch-13', hari: 'Kamis', jamKe: '07.00 - 08.30', kelasId: 'cls-12ipa1', guruId: 'usr-guru2', mapelId: 'sub-1' },
+  { id: 'sch-14', hari: 'Kamis', jamKe: '08.30 - 10.00', kelasId: 'cls-10ipa1', guruId: 'guru-3', mapelId: 'sub-4' },
+  { id: 'sch-15', hari: 'Kamis', jamKe: '10.00 - 11.30', kelasId: 'cls-12ips1', guruId: 'usr-guru1', mapelId: 'sub-6' },
+
+  // Jumat
+  { id: 'sch-16', hari: 'Jumat', jamKe: '07.00 - 08.30', kelasId: 'cls-12ips1', guruId: 'usr-guru1', mapelId: 'sub-2' },
+  { id: 'sch-17', hari: 'Jumat', jamKe: '08.30 - 10.00', kelasId: 'cls-10ipa1', guruId: 'usr-guru1', mapelId: 'sub-6' },
+
+  // Sabtu
+  { id: 'sch-18', hari: 'Sabtu', jamKe: '07.00 - 08.30', kelasId: 'cls-10ipa1', guruId: 'usr-guru2', mapelId: 'sub-3' },
+  { id: 'sch-19', hari: 'Sabtu', jamKe: '08.00 - 09.30', kelasId: 'cls-12ipa1', guruId: 'guru-3', mapelId: 'sub-4' },
+  { id: 'sch-20', hari: 'Sabtu', jamKe: '09.30 - 11.00', kelasId: 'cls-12ipa1', guruId: 'guru-4', mapelId: 'sub-5' },
+];
+
+export const defaultAnnouncements: Announcement[] = [
+  {
+    id: 'ann-1',
+    judul: 'Pelaksanaan Asesmen Sumatif Akhir Semester (ASAS) Genap',
+    isi: 'Diberitahukan kepada seluruh siswa MAS AL-AMIEN I PRAGAAN bahwa ASAS akan dilaksanakan mulai tanggal 10 Agustus 2026. Mohon mempersiapkan fisik dan mental serta menjaga kedisiplinan belajar.',
+    kategori: 'penting',
+    tanggal: '2026-08-01',
+    pembuat: 'Administrator Madrasah',
+  },
+  {
+    id: 'ann-2',
+    judul: 'Kegiatan Istighotsah Rutin dan Kajian Kitab',
+    isi: 'Seluruh civitas akademika wajib menghadiri kegiatan Istighotsah dan Kajian Kitab Ta\'lim Muta\'allim setiap hari Jumat pagi pukul 06.30 WIB di Masjid Al-Amien.',
+    kategori: 'umum',
+    tanggal: '2026-07-28',
+    pembuat: 'SYAIFUDIN KUDSI, SHI. MA.',
+  },
+  {
+    id: 'ann-3',
+    judul: 'Pengembalian dan Peminjaman Buku Cetak Perpustakaan',
+    isi: 'Bagi siswa kelas XII yang ingin meminjam modul latihan ujian nasional/SNBT disilakan mendatangi Perpustakaan Madrasah pada jam istirahat.',
+    kategori: 'umum',
+    tanggal: '2026-07-25',
+    pembuat: 'Tim Perpustakaan',
+  },
+];
+
+export const defaultAssessments: Assessment[] = [
+  {
+    id: 'asm-1',
+    judul: 'Asesmen Harian Fiqih: Bab Zakat dan Wakaf',
+    kelasId: 'cls-12ipa1',
+    mapelId: 'sub-2',
+    guruId: 'usr-guru1',
+    jumlahSoal: 5,
+    jenisSoal: 'Pilihan Ganda 5 Opsi',
+    waktuMulai: '2026-08-01 08:00',
+    lamaUjianMenit: 30,
+    aktif: true,
+    soalList: [
+      {
+        id: 'q-1',
+        pertanyaan: 'Apakah hukum memberikan zakat fitrah kepada faqr dan miskin menurut ijma ulama?',
+        opsi: [
+          { key: 'A', text: 'Wajib ain bagi setiap muslim yang mampu' },
+          { key: 'B', text: 'Sunnah muakkadah' },
+          { key: 'C', text: 'Fardhu kifayah' },
+          { key: 'D', text: 'Mubah saja' },
+          { key: 'E', text: 'Makruh bila ditunda' },
+        ],
+        kunciJawaban: 'A',
+        bobot: 20,
+      },
+      {
+        id: 'q-2',
+        pertanyaan: 'Nishab zakat emas yang diwajibkan untuk dikeluarkan sebesar 2,5% adalah...',
+        opsi: [
+          { key: 'A', text: '50 gram' },
+          { key: 'B', text: '85 gram emas murni' },
+          { key: 'C', text: '100 gram' },
+          { key: 'D', text: '93,6 gram' },
+          { key: 'E', text: '75 gram' },
+        ],
+        kunciJawaban: 'B',
+        bobot: 20,
+      },
+      {
+        id: 'q-3',
+        pertanyaan: 'Rukun wakaf dalam hukum fiqih keagamaan terdiri atas 4 hal, KECUALI...',
+        opsi: [
+          { key: 'A', text: 'Waqif (Orang yang berwakaf)' },
+          { key: 'B', text: 'Mauquf \'alaih (Penerima wakaf)' },
+          { key: 'C', text: 'Mauquf (Harta benda wakaf)' },
+          { key: 'D', text: 'Sighat (Lafaz ikrar wakaf)' },
+          { key: 'E', text: 'Saksi minimal 10 orang pejabat' },
+        ],
+        kunciJawaban: 'E',
+        bobot: 20,
+      },
+      {
+        id: 'q-4',
+        pertanyaan: 'Siapakah golongan penerima zakat (Mustahiq) yang disebutkan dalam Surat At-Taubah ayat 60?',
+        opsi: [
+          { key: 'A', text: 'Hanya orang miskin dan anak yatim' },
+          { key: 'B', text: '8 Golongan (Asnaf Tsamaniyah)' },
+          { key: 'C', text: 'Pengurus masjid dan RT setempat' },
+          { key: 'D', text: 'Lembaga pendidikan swasta saja' },
+          { key: 'E', text: 'Keluarga terdekat pemberi zakat' },
+        ],
+        kunciJawaban: 'B',
+        bobot: 20,
+      },
+      {
+        id: 'q-5',
+        pertanyaan: 'Syarat sah harta yang diwakafkan menurut Fiqih Islam adalah...',
+        opsi: [
+          { key: 'A', text: 'Kekal zatnya dan bermanfaat secara berkelanjutan' },
+          { key: 'B', text: 'Bisa habis dikonsumsi sekali pakai' },
+          { key: 'C', text: 'Harta sewaan dari pihak ketiga' },
+          { key: 'D', text: 'Barang yang belum dimiliki secara sah' },
+          { key: 'E', text: 'Uang palsu atau kredit bermasalah' },
+        ],
+        kunciJawaban: 'A',
+        bobot: 20,
+      },
+    ],
+  },
+  {
+    id: 'asm-2',
+    judul: 'Ujian Harian Bahasa Arab: Tarkib & Qira\'ah',
+    kelasId: 'cls-12ipa1',
+    mapelId: 'sub-3',
+    guruId: 'usr-guru2',
+    jumlahSoal: 3,
+    jenisSoal: 'Pilihan Ganda 5 Opsi',
+    waktuMulai: '2026-08-02 09:00',
+    lamaUjianMenit: 45,
+    aktif: true,
+    soalList: [
+      {
+        id: 'q2-1',
+        pertanyaan: 'Manakah di bawah ini contoh Fi\'il Madhi Mujarrad dalam tata bahasa Arab?',
+        opsi: [
+          { key: 'A', text: 'Kataba (كتب)' },
+          { key: 'B', text: 'Yaktubu (يكتب)' },
+          { key: 'C', text: 'Uktub (اكتب)' },
+          { key: 'D', text: 'Katibun (كاتب)' },
+          { key: 'E', text: 'Maktubun (مكتوب)' },
+        ],
+        kunciJawaban: 'A',
+        bobot: 33,
+      },
+      {
+        id: 'q2-2',
+        pertanyaan: 'Fungsi dari Na\'at (Sifat) dalam kaidah jumlah ismiyyah adalah...',
+        opsi: [
+          { key: 'A', text: 'Menjelaskan keadaan fa\'il' },
+          { key: 'B', text: 'Mengikuti Man\'ut dalam jenis, bilangan, irab, dan ma\'rifah/nakirah' },
+          { key: 'C', text: 'Menjadi khabar mutlaq' },
+          { key: 'D', text: 'Menolak klausa mabni' },
+          { key: 'E', text: 'Merapikan maf\'ul bih' },
+        ],
+        kunciJawaban: 'B',
+        bobot: 33,
+      },
+      {
+        id: 'q2-3',
+        pertanyaan: 'Arti dari mufrodāt "المكتبة" (Al-Maktabah) adalah...',
+        opsi: [
+          { key: 'A', text: 'Laboratorium Sains' },
+          { key: 'B', text: 'Perpustakaan' },
+          { key: 'C', text: 'Ruang Kepala Madrasah' },
+          { key: 'D', text: 'Kantin Sekolah' },
+          { key: 'E', text: 'Lapangan Olahraga' },
+        ],
+        kunciJawaban: 'B',
+        bobot: 34,
+      },
+    ],
+  },
+];
+
+export const defaultTeacherAttendances: TeacherAttendance[] = [];
+
+export const defaultStudentAttendances: StudentAttendance[] = [];
+
+export const defaultTeachingJournals: TeachingJournal[] = [
+  {
+    id: 'tj-1',
+    guruId: 'usr-guru1',
+    guruNama: 'SYAIFUDIN KUDSI, SHI. MA.',
+    tanggal: '2026-08-01',
+    jamKe: '08.30 - 10.00',
+    kelasId: 'cls-12ipa1',
+    mapelId: 'sub-2',
+    materi: 'Pembahasan Rukun Wakaf & Penerapan Fiqih Kontemporer',
+    catatanSiswa: 'Siswa sangat antusias berdiskusi. Alif izin keluarga.',
+  },
+  {
+    id: 'tj-2',
+    guruId: 'usr-guru2',
+    guruNama: 'AHMAD ZAINI, S.Pd.I',
+    tanggal: '2026-08-01',
+    jamKe: '07.00 - 08.30',
+    kelasId: 'cls-12ipa1',
+    mapelId: 'sub-3',
+    materi: 'Qira\'ah dan Tarkib Fi\'il Madhi & Mudhari',
+    catatanSiswa: 'Siswa latihan membaca dan menterjemahkan teks berbahasa Arab.',
+  },
+];
+
+export const defaultGradeRecords: GradeRecord[] = [
+  {
+    id: 'gr-1',
+    siswaId: 'usr-siswa1',
+    siswaNama: 'Ahmad Farisi Subakti',
+    kelasId: 'cls-12ipa1',
+    mapelId: 'sub-2',
+    asesmen1: 88,
+    asesmen2: 92,
+    asesmen3: 90,
+    asas: 94,
+    nilaiAkhir: 91.5,
+  },
+  {
+    id: 'gr-2',
+    siswaId: 'usr-siswa2',
+    siswaNama: 'Siti Fatimah Az-Zahra',
+    kelasId: 'cls-12ipa1',
+    mapelId: 'sub-2',
+    asesmen1: 95,
+    asesmen2: 96,
+    asesmen3: 94,
+    asas: 98,
+    nilaiAkhir: 95.75,
+  },
+  {
+    id: 'gr-3',
+    siswaId: 'sis-3',
+    siswaNama: 'Mohammad Alif Pratama',
+    kelasId: 'cls-12ipa1',
+    mapelId: 'sub-2',
+    asesmen1: 80,
+    asesmen2: 84,
+    asesmen3: 82,
+    asas: 85,
+    nilaiAkhir: 82.75,
+  },
+];
+
+export const defaultLibraryBooks: LibraryBook[] = [
+  {
+    id: 'bk-1',
+    judul: 'Kitab Fiqih Al-Wadhih Juz 3',
+    pengarang: 'Dr. Mahmud Yunus',
+    penerbit: 'PT Hidakarya Surabaya',
+    kategori: 'Keagamaan',
+    tahunTerbit: 2021,
+    stok: 45,
+    coverColor: 'from-emerald-600 to-teal-800',
+    ringkasan: 'Panduan fiqih Ibadah dan Muamalah tingkat Aliyah terpadu.',
+    filePdfDemoUrl: 'https://raw.githubusercontent.com/mozilla/pdf.js/ba2edeae/examples/learning/helloworld.pdf',
+  },
+  {
+    id: 'bk-2',
+    judul: 'Panduan Belajar Bahasa Arab Modern Kurikulum Merdeka',
+    pengarang: 'Ahmad Zaini, S.Pd.I & Tim Kemag',
+    penerbit: 'Penerbit Pustaka Madrasah',
+    kategori: 'Bahasa',
+    tahunTerbit: 2023,
+    stok: 60,
+    coverColor: 'from-blue-600 to-indigo-800',
+    ringkasan: 'Modul qiraah, kitabah, muhadatsah dan analisis tarkib grammar Arab.',
+  },
+  {
+    id: 'bk-3',
+    judul: 'Fisika Terapan untuk SMA/MA Kelas XII',
+    pengarang: 'Prof. Bambang Supriadi',
+    penerbit: 'Erlangga',
+    kategori: 'Sains',
+    tahunTerbit: 2022,
+    stok: 35,
+    coverColor: 'from-amber-600 to-orange-800',
+    ringkasan: 'Membahas elektromagnetik, optik kuantum, dan aplikasi energi terbarukan.',
+  },
+  {
+    id: 'bk-4',
+    judul: 'Ta\'lim Muta\'allim (Terjemah & Syarah)',
+    pengarang: 'Syaikh Az-Zarnuji',
+    penerbit: 'Pustaka Tebuireng',
+    kategori: 'Akhlak & Keagamaan',
+    tahunTerbit: 2020,
+    stok: 50,
+    coverColor: 'from-purple-600 to-slate-900',
+    ringkasan: 'Panduan etika pencari ilmu dan keberkahan hubungan santri dan guru.',
+  },
+  {
+    id: 'bk-5',
+    judul: 'Matematika Peminatan & Kalkulus Tingkat Lanjut',
+    pengarang: 'Drs. Sukino',
+    penerbit: 'Yrama Widya',
+    kategori: 'Matematika',
+    tahunTerbit: 2023,
+    stok: 28,
+    coverColor: 'from-cyan-600 to-blue-900',
+    ringkasan: 'Materi turunan, integral, turunan trigonometri dan latihan soal persiapan UTBK.',
+  },
+];
+
+export const defaultCalendarEvents: CalendarEvent[] = [];
+
+
