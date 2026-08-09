@@ -39,16 +39,6 @@ export const defaultUsers: User[] = [
     avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80',
     status: 'Aktif',
   },
-  {
-    id: 'guru-latif',
-    username: 'abdullatif',
-    password: '123',
-    name: 'Abdul Latif, S.Pd.I.',
-    role: 'guru',
-    nuptkOrNisn: '198709122014021008',
-    status: 'Aktif',
-    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&auto=format&fit=crop&q=80',
-  },
 ];
 
 export const defaultTeachers: TeacherItem[] = [
@@ -88,19 +78,9 @@ export const defaultTeachers: TeacherItem[] = [
     telepon: '081234567893',
     status: 'Aktif',
   },
-  {
-    id: 'guru-latif',
-    nama: 'Abdul Latif, S.Pd.I.',
-    nuptk: '198709122014021008',
-    mengajarMapel: 'Agribisnis Ternak Unggas',
-    email: 'abdullatif@al-amien.sch.id',
-    telepon: '081234567894',
-    status: 'Aktif',
-  },
 ];
 
 export const defaultClasses: ClassItem[] = [
-  { id: 'cls-10a', namaKelas: 'Kelas X-A', waliKelas: 'Abdul Latif, S.Pd.I.', jumlahSiswa: 32 },
   { id: 'cls-10ipa1', namaKelas: 'X IPA 1', waliKelas: 'NURUL HIDAYATI, M.Pd.', jumlahSiswa: 32 },
   { id: 'cls-11ipa1', namaKelas: 'XI IPA 1', waliKelas: 'MOHAMMAD RIFQI, S.Si.', jumlahSiswa: 30 },
   { id: 'cls-12ipa1', namaKelas: 'XII IPA 1', waliKelas: 'AHMAD ZAINI, S.Pd.I', jumlahSiswa: 34 },
@@ -162,7 +142,6 @@ export const defaultSubjects: SubjectItem[] = [
   { id: 'sub-4', kode: 'MA-04', namaMapel: 'Matematika Peminatan', kelompok: 'Peminatan' },
   { id: 'sub-5', kode: 'MA-05', namaMapel: 'Fisika Terapan', kelompok: 'Peminatan' },
   { id: 'sub-6', kode: 'MA-06', namaMapel: 'Keagamaan / Kitab Kuning', kelompok: 'Muatan Lokal' },
-  { id: 'sub-7', kode: 'MA-07', namaMapel: 'Agribisnis Ternak Unggas', kelompok: 'Peminatan' },
 ];
 
 export const defaultSchedules: ScheduleItem[] = [
@@ -170,31 +149,26 @@ export const defaultSchedules: ScheduleItem[] = [
   { id: 'sch-1', hari: 'Ahad', jamKe: '07.00 - 08.00', kelasId: 'cls-12ipa1', guruId: 'usr-guru1', mapelId: 'sub-6' },
   { id: 'sch-2', hari: 'Ahad', jamKe: '08.00 - 09.30', kelasId: 'cls-11ipa1', guruId: 'usr-guru2', mapelId: 'sub-1' },
   { id: 'sch-3', hari: 'Ahad', jamKe: '09.30 - 11.00', kelasId: 'cls-10ipa1', guruId: 'guru-3', mapelId: 'sub-4' },
-  { id: 'sch-22', hari: 'Ahad', jamKe: '08.00 - 09.30', kelasId: 'cls-10a', guruId: 'guru-latif', mapelId: 'sub-7' },
 
   // Senin
   { id: 'sch-4', hari: 'Senin', jamKe: '07.00 - 08.30', kelasId: 'cls-12ipa1', guruId: 'usr-guru2', mapelId: 'sub-3' },
   { id: 'sch-5', hari: 'Senin', jamKe: '08.30 - 10.00', kelasId: 'cls-12ipa1', guruId: 'usr-guru1', mapelId: 'sub-2' },
   { id: 'sch-6', hari: 'Senin', jamKe: '10.00 - 11.30', kelasId: 'cls-11ipa1', guruId: 'guru-3', mapelId: 'sub-4' },
-  { id: 'sch-23', hari: 'Senin', jamKe: '08.30 - 10.00', kelasId: 'cls-10a', guruId: 'guru-latif', mapelId: 'sub-7' },
 
   // Selasa
   { id: 'sch-7', hari: 'Selasa', jamKe: '07.00 - 08.30', kelasId: 'cls-12ipa1', guruId: 'guru-3', mapelId: 'sub-4' },
   { id: 'sch-8', hari: 'Selasa', jamKe: '08.30 - 10.00', kelasId: 'cls-11ipa1', guruId: 'guru-4', mapelId: 'sub-5' },
   { id: 'sch-9', hari: 'Selasa', jamKe: '10.00 - 11.30', kelasId: 'cls-10ipa1', guruId: 'usr-guru1', mapelId: 'sub-2' },
-  { id: 'sch-24', hari: 'Selasa', jamKe: '10.00 - 11.30', kelasId: 'cls-10a', guruId: 'guru-latif', mapelId: 'sub-7' },
 
   // Rabu
   { id: 'sch-10', hari: 'Rabu', jamKe: '07.00 - 08.30', kelasId: 'cls-12ips1', guruId: 'usr-guru2', mapelId: 'sub-1' },
   { id: 'sch-11', hari: 'Rabu', jamKe: '08.30 - 10.00', kelasId: 'cls-12ipa1', guruId: 'guru-4', mapelId: 'sub-5' },
   { id: 'sch-12', hari: 'Rabu', jamKe: '10.00 - 11.30', kelasId: 'cls-11ipa1', guruId: 'usr-guru2', mapelId: 'sub-3' },
-  { id: 'sch-25', hari: 'Rabu', jamKe: '07.00 - 08.30', kelasId: 'cls-10a', guruId: 'guru-latif', mapelId: 'sub-7' },
 
   // Kamis
   { id: 'sch-13', hari: 'Kamis', jamKe: '07.00 - 08.30', kelasId: 'cls-12ipa1', guruId: 'usr-guru2', mapelId: 'sub-1' },
   { id: 'sch-14', hari: 'Kamis', jamKe: '08.30 - 10.00', kelasId: 'cls-10ipa1', guruId: 'guru-3', mapelId: 'sub-4' },
   { id: 'sch-15', hari: 'Kamis', jamKe: '10.00 - 11.30', kelasId: 'cls-12ips1', guruId: 'usr-guru1', mapelId: 'sub-6' },
-  { id: 'sch-26', hari: 'Kamis', jamKe: '10.00 - 11.30', kelasId: 'cls-10a', guruId: 'guru-latif', mapelId: 'sub-7' },
 
   // Jumat
   { id: 'sch-16', hari: 'Jumat', jamKe: '07.00 - 08.30', kelasId: 'cls-12ips1', guruId: 'usr-guru1', mapelId: 'sub-2' },
@@ -204,7 +178,6 @@ export const defaultSchedules: ScheduleItem[] = [
   { id: 'sch-18', hari: 'Sabtu', jamKe: '07.00 - 08.30', kelasId: 'cls-10ipa1', guruId: 'usr-guru2', mapelId: 'sub-3' },
   { id: 'sch-19', hari: 'Sabtu', jamKe: '08.00 - 09.30', kelasId: 'cls-12ipa1', guruId: 'guru-3', mapelId: 'sub-4' },
   { id: 'sch-20', hari: 'Sabtu', jamKe: '09.30 - 11.00', kelasId: 'cls-12ipa1', guruId: 'guru-4', mapelId: 'sub-5' },
-  { id: 'sch-21', hari: 'Sabtu', jamKe: '07.00 - 08.30', kelasId: 'cls-10a', guruId: 'guru-latif', mapelId: 'sub-7' },
 ];
 
 export const defaultAnnouncements: Announcement[] = [
