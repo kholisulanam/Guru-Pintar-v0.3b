@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ScheduleItem, User, SubjectItem, ClassItem, TeacherItem } from '../../types';
 import { Calendar, Clock, BookOpen, UserCheck, Filter } from 'lucide-react';
+import { sortSchedulesByJam } from '../../lib/matchUtils';
 
 interface SiswaJadwalProps {
   currentUser: User;
@@ -61,7 +62,7 @@ export const SiswaJadwal: React.FC<SiswaJadwalProps> = ({
       {/* Grid of Schedules per Day */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {hariList.map((hari) => {
-          const daySchedules = classSchedules.filter((s) => s.hari === hari);
+          const daySchedules = sortSchedulesByJam(classSchedules.filter((s) => s.hari === hari));
 
           return (
             <div key={hari} className="bg-slate-900 border border-slate-800 rounded-2xl p-4 text-slate-100 shadow-md">

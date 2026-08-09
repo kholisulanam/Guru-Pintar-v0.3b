@@ -11,6 +11,7 @@ import {
 } from '../../types';
 import { getTodayString } from '../../lib/storage';
 import { canUserAccessAssessment } from '../../lib/assessmentUtils';
+import { sortSchedulesByJam } from '../../lib/matchUtils';
 import { Clock, CheckCircle2, Bell, FileCheck, BookOpen, ArrowRight, Award } from 'lucide-react';
 
 interface SiswaDashboardProps {
@@ -46,8 +47,8 @@ export const SiswaDashboard: React.FC<SiswaDashboardProps> = ({
   const myClassObj = classes.find((c) => c.id === myClassId);
 
   // Today's schedule for student's class
-  const todaySchedules = schedules.filter(
-    (s) => s.kelasId === myClassId && s.hari === currentDayName
+  const todaySchedules = sortSchedulesByJam(
+    schedules.filter((s) => s.kelasId === myClassId && s.hari === currentDayName)
   );
 
   // Today's attendance status for this student

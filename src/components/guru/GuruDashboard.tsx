@@ -2,6 +2,7 @@ import React from 'react';
 import { User, ScheduleItem, TeacherAttendance, TeachingJournal, Assessment, SubjectItem, ClassItem } from '../../types';
 import { getTodayString } from '../../lib/storage';
 import { canUserAccessAssessment } from '../../lib/assessmentUtils';
+import { sortSchedulesByJam } from '../../lib/matchUtils';
 import { Clock, CalendarCheck, BookOpen, FileCheck, CheckCircle2, AlertCircle, ArrowRight } from 'lucide-react';
 
 interface GuruDashboardProps {
@@ -33,8 +34,8 @@ export const GuruDashboard: React.FC<GuruDashboardProps> = ({
   const currentDayName = daysMap[dayIndex];
 
   // Teacher's today schedule
-  const todaySchedules = schedules.filter(
-    (s) => s.guruId === currentUser.id && s.hari === currentDayName
+  const todaySchedules = sortSchedulesByJam(
+    schedules.filter((s) => s.guruId === currentUser.id && s.hari === currentDayName)
   );
 
   // Teacher's today attendance status

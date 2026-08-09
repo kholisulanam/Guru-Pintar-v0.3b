@@ -141,3 +141,51 @@ export function matchClass(rawKelas: string, classes: ClassItem[]): ClassItem | 
 
   return null;
 }
+
+/**
+ * Converts a schedule time string or period label (e.g. "07.00 - 08.30", "08.30", "Jam Ke-1", "1") into total minutes from midnight for chronological sorting.
+ */
+export function parseJamKeToMinutes(jamKe: string): number {
+  if (!jamKe) return 9999;
+  const str = jamKe.trim();
+
+  // 1. Look for time pattern like HH:MM or HH.MM (e.g. "07.00 - 08.30", "07:30")
+  const timeMatch = str.match(/(\d{1,2})[:.](\d{2})/);
+  if (timeMatch) {
+    const hours = parseInt(timeMatch[1], 10);
+    const minutes = parseInt(timeMatch[2], 10);
+    return hours * 60 + minutes;
+  }
+
+  // 2. Look for single hour number if specified as HH
+  const hourMatch = str.match(/^(\d{1,2})\b/);
+  if (hourMatch) {
+    const val = parseInt(hourMatch[1], 10);
+    if (val >= 6 && val <= 18) {
+      return val * 60;
+    }
+    return val * 60;
+  }
+
+  // 3. Fallback: extract any digits as period number
+  const numMatch = str.match(/\d+/);
+  if (numMatch) {
+    return parseInt(numMatch[0], 10) * 60;
+  }
+
+  return 9999;
+}
+
+/**
+ * Sorts an array of schedule items chronologically based on their jamKe / teaching time order.
+ */
+export function sortSchedulesByJam<T extends Record<string, any>>(items: T[]): T[] {
+  return [...items].sort((a, b) => {
+    const minA = parseJamKeToMinutes(a.jamKe || '');
+    const minB = parseJamKeToMinutes(b.jamKe || '');
+    if (minA !== minB) {
+      return minA - minB;
+    }
+    return (a.jamKe || '').localeCompare(b.jamKe || '');
+  });
+}
