@@ -30,8 +30,8 @@ export interface TeacherItem {
   nama: string;
   nuptk: string;
   mengajarMapel: string;
-  email: string;
-  telepon: string;
+  email?: string;
+  telepon?: string;
   status: 'Aktif' | 'Non-Aktif';
 }
 

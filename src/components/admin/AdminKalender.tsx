@@ -31,6 +31,7 @@ import {
 import { CalendarEvent, CalendarEventType, ScheduleItem, TeacherItem, ClassItem, SubjectItem } from '../../types';
 import { getTodayString } from '../../lib/storage';
 import { defaultTeachers, defaultClasses, defaultSubjects } from '../../lib/initialData';
+import { matchTeacher, matchSubject, matchClass } from '../../lib/matchUtils';
 import {
   broadcastReminderToAll,
   playReminderChime,
@@ -160,26 +161,14 @@ export const AdminKalender: React.FC<AdminKalenderProps> = ({
     const seenSyncKeys = new Set<string>();
 
     schedulesToSync.forEach((sch) => {
-      let guru = teachers.find((t) => t.id === sch.guruId)?.nama ||
-                 teachers.find((t) => t.nama.toLowerCase() === sch.guruId.toLowerCase())?.nama ||
-                 defaultTeachers.find((dt) => dt.id === sch.guruId || dt.nama.toLowerCase() === sch.guruId.toLowerCase())?.nama;
-      if (!guru) {
-        guru = sch.guruId.startsWith('guru-imp') ? (teachers[0]?.nama || 'Guru Pengajar') : sch.guruId || 'Guru Pengajar';
-      }
+      const guruObj = matchTeacher(sch.guruId, teachers) || matchTeacher(sch.guruId, defaultTeachers);
+      const guru = guruObj?.nama || sch.guruId || 'Guru Pengajar';
 
-      let kelas = classes.find((c) => c.id === sch.kelasId)?.namaKelas ||
-                  classes.find((c) => c.namaKelas.toLowerCase() === sch.kelasId.toLowerCase())?.namaKelas ||
-                  defaultClasses.find((dc) => dc.id === sch.kelasId || dc.namaKelas.toLowerCase() === sch.kelasId.toLowerCase())?.namaKelas;
-      if (!kelas) {
-        kelas = sch.kelasId.startsWith('cls-imp') ? (classes[0]?.namaKelas || 'Kelas') : sch.kelasId || 'Kelas';
-      }
+      const kelasObj = matchClass(sch.kelasId, classes) || matchClass(sch.kelasId, defaultClasses);
+      const kelas = kelasObj?.namaKelas || sch.kelasId || 'Kelas';
 
-      let mapel = subjects.find((s) => s.id === sch.mapelId)?.namaMapel ||
-                  subjects.find((s) => s.namaMapel.toLowerCase() === sch.mapelId.toLowerCase())?.namaMapel ||
-                  defaultSubjects.find((ds) => ds.id === sch.mapelId || ds.namaMapel.toLowerCase() === sch.mapelId.toLowerCase())?.namaMapel;
-      if (!mapel) {
-        mapel = sch.mapelId.startsWith('mpl-imp') || sch.mapelId.startsWith('sub-imp') ? (subjects[0]?.namaMapel || 'Mata Pelajaran') : sch.mapelId || 'Mata Pelajaran';
-      }
+      const mapelObj = matchSubject(sch.mapelId, subjects) || matchSubject(sch.mapelId, defaultSubjects);
+      const mapel = mapelObj?.namaMapel || sch.mapelId || 'Mata Pelajaran';
 
       const jamText = sch.jamKe || '08:00 - 09:30';
       const parts = jamText.split('-');

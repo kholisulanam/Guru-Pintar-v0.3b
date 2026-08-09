@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import { matchClass } from '../../lib/matchUtils';
 import {
   TeacherItem,
   StudentItem,
@@ -645,10 +646,8 @@ export const AdminPengelolaan: React.FC<AdminPengelolaanProps> = ({
         }
 
         const imported: StudentItem[] = data.map((item, idx) => {
-          const rawClassStr = (item.Kelas || item.kelas || item.NamaKelas || '').toString().trim().toLowerCase();
-          const matchedClass = classes.find(
-            (c) => c.namaKelas.toLowerCase() === rawClassStr || c.id.toLowerCase() === rawClassStr
-          );
+          const rawClassStr = (item.Kelas || item.kelas || item.NamaKelas || '').toString().trim();
+          const matchedClass = matchClass(rawClassStr, classes);
           const classIdToUse = matchedClass ? matchedClass.id : (classes[0]?.id || 'cls-12ipa1');
 
           const rawJk = String(

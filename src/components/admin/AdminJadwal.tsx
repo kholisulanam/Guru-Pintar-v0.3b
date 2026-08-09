@@ -3,6 +3,7 @@ import { ScheduleItem, TeacherItem, SubjectItem, ClassItem } from '../../types';
 import { Calendar, Plus, Trash2, Edit, Download, Upload, Filter, Clock, CheckCircle2, Check, X } from 'lucide-react';
 import { exportToExcel } from '../../lib/exportUtils';
 import { storageService } from '../../lib/storage';
+import { matchTeacher, matchSubject, matchClass, cleanStr } from '../../lib/matchUtils';
 import * as XLSX from 'xlsx';
 
 interface AdminJadwalProps {
@@ -143,15 +144,8 @@ export const AdminJadwal: React.FC<AdminJadwalProps> = ({
 
           const rawJam = String(item.JamKe || item.jamKe || item['Jam Ke'] || item.Jam || '07.00-07.40').trim();
 
-          const cleanStr = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '');
-
           const rawKelas = String(item.Kelas || item.kelas || '').trim();
-          const cleanKelas = cleanStr(rawKelas);
-          let matchedClass = curClasses.find((c) => {
-            const cClean = cleanStr(c.namaKelas);
-            if (!cleanKelas || !cClean) return false;
-            return cClean === cleanKelas || cClean.includes(cleanKelas) || cleanKelas.includes(cClean);
-          });
+          let matchedClass = matchClass(rawKelas, curClasses);
           if (!matchedClass && rawKelas) {
             matchedClass = {
               id: `cls-imp-${Date.now()}-${idx}-${Math.random().toString(36).substring(2, 5)}`,
@@ -164,21 +158,15 @@ export const AdminJadwal: React.FC<AdminJadwalProps> = ({
           }
 
           const rawGuru = String(item.Guru || item.guru || '').trim();
-          const cleanGuru = cleanStr(rawGuru);
-          let matchedGuru = curTeachers.find((t) => {
-            const tClean = cleanStr(t.nama);
-            if (!cleanGuru || !tClean) return false;
-            if (tClean === cleanGuru || tClean.includes(cleanGuru) || cleanGuru.includes(tClean)) return true;
-            const tTokens = t.nama.toLowerCase().split(/[\s,.]+/).filter((x) => x.length > 2);
-            const rTokens = rawGuru.toLowerCase().split(/[\s,.]+/).filter((x) => x.length > 2);
-            return tTokens.some((tok) => rTokens.includes(tok));
-          });
+          let matchedGuru = matchTeacher(rawGuru, curTeachers);
           if (!matchedGuru && rawGuru) {
             matchedGuru = {
               id: `guru-imp-${Date.now()}-${idx}-${Math.random().toString(36).substring(2, 5)}`,
               nama: rawGuru,
               nuptk: `${Math.floor(1000000000000000 + Math.random() * 9000000000000000)}`,
               mengajarMapel: String(item.Mapel || item.mapel || 'Mata Pelajaran').trim(),
+              email: `${cleanStr(rawGuru)}@al-amien.sch.id`,
+              telepon: '-',
               status: 'Aktif',
             };
             curTeachers.push(matchedGuru);
@@ -186,12 +174,7 @@ export const AdminJadwal: React.FC<AdminJadwalProps> = ({
           }
 
           const rawMapel = String(item.Mapel || item.mapel || '').trim();
-          const cleanMapel = cleanStr(rawMapel);
-          let matchedMapel = curSubjects.find((s) => {
-            const sClean = cleanStr(s.namaMapel);
-            if (!cleanMapel || !sClean) return false;
-            return sClean === cleanMapel || sClean.includes(cleanMapel) || cleanMapel.includes(sClean);
-          });
+          let matchedMapel = matchSubject(rawMapel, curSubjects);
           if (!matchedMapel && rawMapel) {
             matchedMapel = {
               id: `sub-imp-${Date.now()}-${idx}-${Math.random().toString(36).substring(2, 5)}`,
@@ -465,13 +448,13 @@ export const AdminJadwal: React.FC<AdminJadwalProps> = ({
             </thead>
             <tbody className="divide-y divide-slate-800">
               {filteredSchedules.map((sch) => {
-                let guru = teachers.find((t) => t.id === sch.guruId) || teachers.find((t) => t.nama.toLowerCase() === sch.guruId.toLowerCase());
-                let mapel = subjects.find((m) => m.id === sch.mapelId) || subjects.find((m) => m.namaMapel.toLowerCase() === sch.mapelId.toLowerCase());
-                let kelas = classes.find((c) => c.id === sch.kelasId) || classes.find((c) => c.namaKelas.toLowerCase() === sch.kelasId.toLowerCase());
+                const guru = matchTeacher(sch.guruId, teachers);
+                const mapel = matchSubject(sch.mapelId, subjects);
+                const kelas = matchClass(sch.kelasId, classes);
 
-                const displayKelas = kelas?.namaKelas || (sch.kelasId.startsWith('cls-imp') ? (classes[0]?.namaKelas || 'Kelas General') : sch.kelasId || '-');
-                const displayMapel = mapel?.namaMapel || (sch.mapelId.startsWith('mpl-imp') || sch.mapelId.startsWith('sub-imp') ? (subjects[0]?.namaMapel || 'Mata Pelajaran') : sch.mapelId || '-');
-                const displayGuru = guru?.nama || (sch.guruId.startsWith('guru-imp') ? (teachers[0]?.nama || 'Guru Pengajar') : sch.guruId || '-');
+                const displayKelas = kelas?.namaKelas || sch.kelasId || '-';
+                const displayMapel = mapel?.namaMapel || sch.mapelId || '-';
+                const displayGuru = guru?.nama || sch.guruId || '-';
 
                 return (
                   <tr key={sch.id} className="hover:bg-slate-800/50 transition">
