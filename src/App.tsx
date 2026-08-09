@@ -93,11 +93,17 @@ import { SiswaPengumuman } from './components/siswa/SiswaPengumuman';
 import { CbtExamModal } from './components/cbt/CbtExamModal';
 
 export default function App() {
-  // Global State initialized with local storage fallback
+  // Global State initialized with local storage fallback and automatic default merging
   const [users, setUsers] = useState<User[]>(() => {
     const loaded = storageService.get<User[]>('users', defaultUsers);
     const baseList = Array.isArray(loaded) && loaded.length > 0 ? loaded : defaultUsers;
-    return baseList.map((u) => {
+    const merged = [...baseList];
+    defaultUsers.forEach((defU) => {
+      if (!merged.some((u) => u.id === defU.id || u.username === defU.username)) {
+        merged.push(defU);
+      }
+    });
+    return merged.map((u) => {
       if (u.role === 'siswa' && !u.password) return { ...u, password: u.username || '12345678' };
       if (u.role === 'admin' && (u.password === 'admin123' || u.password === 'admin2026' || !u.password)) {
         return { ...u, password: 'admin#123' };
@@ -120,25 +126,57 @@ export default function App() {
     storageService.get('settings', defaultSettings)
   );
 
-  const [teachers, setTeachers] = useState<TeacherItem[]>(() =>
-    storageService.get('teachers', defaultTeachers)
-  );
+  const [teachers, setTeachers] = useState<TeacherItem[]>(() => {
+    const loaded = storageService.get<TeacherItem[]>('teachers', defaultTeachers);
+    const baseList = Array.isArray(loaded) && loaded.length > 0 ? loaded : defaultTeachers;
+    const merged = [...baseList];
+    defaultTeachers.forEach((dt) => {
+      if (!merged.some((t) => t.id === dt.id || t.nama.toLowerCase() === dt.nama.toLowerCase())) {
+        merged.push(dt);
+      }
+    });
+    return merged;
+  });
 
   const [students, setStudents] = useState<StudentItem[]>(() =>
     storageService.get('students', defaultStudents)
   );
 
-  const [classes, setClasses] = useState<ClassItem[]>(() =>
-    storageService.get('classes', defaultClasses)
-  );
+  const [classes, setClasses] = useState<ClassItem[]>(() => {
+    const loaded = storageService.get<ClassItem[]>('classes', defaultClasses);
+    const baseList = Array.isArray(loaded) && loaded.length > 0 ? loaded : defaultClasses;
+    const merged = [...baseList];
+    defaultClasses.forEach((dc) => {
+      if (!merged.some((c) => c.id === dc.id || c.namaKelas.toLowerCase() === dc.namaKelas.toLowerCase())) {
+        merged.push(dc);
+      }
+    });
+    return merged;
+  });
 
-  const [subjects, setSubjects] = useState<SubjectItem[]>(() =>
-    storageService.get('subjects', defaultSubjects)
-  );
+  const [subjects, setSubjects] = useState<SubjectItem[]>(() => {
+    const loaded = storageService.get<SubjectItem[]>('subjects', defaultSubjects);
+    const baseList = Array.isArray(loaded) && loaded.length > 0 ? loaded : defaultSubjects;
+    const merged = [...baseList];
+    defaultSubjects.forEach((ds) => {
+      if (!merged.some((s) => s.id === ds.id || s.namaMapel.toLowerCase() === ds.namaMapel.toLowerCase())) {
+        merged.push(ds);
+      }
+    });
+    return merged;
+  });
 
-  const [schedules, setSchedules] = useState<ScheduleItem[]>(() =>
-    storageService.get('schedules', defaultSchedules)
-  );
+  const [schedules, setSchedules] = useState<ScheduleItem[]>(() => {
+    const loaded = storageService.get<ScheduleItem[]>('schedules', defaultSchedules);
+    const baseList = Array.isArray(loaded) && loaded.length > 0 ? loaded : defaultSchedules;
+    const merged = [...baseList];
+    defaultSchedules.forEach((ds) => {
+      if (!merged.some((s) => s.id === ds.id)) {
+        merged.push(ds);
+      }
+    });
+    return merged;
+  });
 
   const [announcements, setAnnouncements] = useState<Announcement[]>(() =>
     storageService.get('announcements', defaultAnnouncements)
