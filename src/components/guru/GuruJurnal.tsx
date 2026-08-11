@@ -98,6 +98,7 @@ export const GuruJurnal: React.FC<GuruJurnalProps> = ({
       rows,
       settings,
       teacherName: currentUser.name,
+      teacherTitle: 'Guru Mata Pelajaran',
       filename: `Jurnal_Mengajar_${currentClassObj?.namaKelas}`,
     });
   };
@@ -284,7 +285,7 @@ export const GuruJurnal: React.FC<GuruJurnalProps> = ({
           </tbody>
         </table>
 
-        <TandaTangan settings={settings} guruNama={currentUser.name} />
+        <TandaTangan settings={settings} guruNama={currentUser.name} jabatan="Guru Mata Pelajaran" />
 
         {/* Menu Cetak Excel & Cetak PDF dipindahkan ke bawah preview / akhir halaman */}
         <div className="mt-8 pt-6 border-t border-slate-200 flex flex-wrap items-center justify-end gap-3 print:hidden">

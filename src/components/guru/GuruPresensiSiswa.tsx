@@ -109,7 +109,8 @@ export const GuruPresensiSiswa: React.FC<GuruPresensiSiswaProps> = ({
       headers,
       rows,
       settings,
-      teacherName: currentUser.name,
+      teacherName: currentClassObj?.waliKelas || currentUser.name,
+      teacherTitle: 'Wali Kelas',
       filename: `Presensi_Murid_${currentClassObj?.namaKelas}_${tanggalInput}`,
       tanggal: tanggalInput,
     });
@@ -280,7 +281,7 @@ export const GuruPresensiSiswa: React.FC<GuruPresensiSiswaProps> = ({
           </tbody>
         </table>
 
-        <TandaTangan settings={settings} guruNama={currentUser.name} />
+        <TandaTangan settings={settings} guruNama={currentClassObj?.waliKelas || currentUser.name} jabatan="Wali Kelas" />
 
         {/* Action Export Buttons dipindahkan ke bawah preview */}
         <div className="mt-8 pt-6 border-t border-slate-200 flex flex-wrap items-center justify-end gap-3 print:hidden">

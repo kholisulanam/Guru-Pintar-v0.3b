@@ -4,12 +4,14 @@ import { SchoolSettings } from '../../types';
 interface TandaTanganProps {
   settings: SchoolSettings;
   guruNama?: string;
+  jabatan?: string;
   locationName?: string;
 }
 
 export const TandaTangan: React.FC<TandaTanganProps> = ({
   settings,
-  guruNama = 'AHMAD ZAINI, S.Pd.I',
+  guruNama = 'Nur Aida, S.Pd.I.',
+  jabatan = 'Guru Mata Pelajaran',
   locationName = 'Pragaan'
 }) => {
   const todayStr = new Date().toLocaleDateString('id-ID', {
@@ -37,7 +39,7 @@ export const TandaTangan: React.FC<TandaTanganProps> = ({
         {/* Right Signature: Nama Guru */}
         <div className="flex flex-col items-end text-right">
           <p className="font-semibold text-slate-700">&nbsp;</p>
-          <p className="font-bold text-slate-900 mb-16">Guru / Penanggung Jawab</p>
+          <p className="font-bold text-slate-900 mb-16">{jabatan}</p>
           <p className="font-bold text-slate-900 underline">{guruNama}</p>
           <p className="text-slate-500 text-[11px] mt-0.5">NIP / NUPTK Terlampir</p>
         </div>

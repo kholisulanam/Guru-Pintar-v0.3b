@@ -241,7 +241,7 @@ export function subscribeToFirebaseKey<T>(key: string, onData: (data: T) => void
             }
           }
         } else {
-          // Document missing in cloud: seed from local storage if available without auto-writing
+          // Document missing in cloud: seed to Firestore from local storage or initial value
           if (localVal !== null && localVal !== undefined) {
             let cleanLocal = localVal;
             if (Array.isArray(cleanLocal)) {
@@ -251,6 +251,13 @@ export function subscribeToFirebaseKey<T>(key: string, onData: (data: T) => void
               const localSerialized = JSON.stringify(cleanLocal);
               lastSyncedPayloadMap.set(key, localSerialized);
               onData(cleanLocal as T);
+
+              // Seed document in Firestore so it persists globally
+              if (!isQuotaExceeded) {
+                setDoc(docRef, { payload: cleanLocal, updatedAt: new Date().toISOString() }).catch((err) => {
+                  console.warn(`Initial seed error for ${key}:`, err);
+                });
+              }
             }
           }
         }

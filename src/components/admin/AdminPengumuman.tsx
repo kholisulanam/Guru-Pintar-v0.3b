@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Announcement } from '../../types';
+import { storageService } from '../../lib/storage';
 import { Bell, Plus, Trash2 } from 'lucide-react';
 
 interface AdminPengumumanProps {
@@ -28,13 +29,17 @@ export const AdminPengumuman: React.FC<AdminPengumumanProps> = ({
       pembuat: 'Administrator Madrasah',
     };
 
-    setAnnouncements((prev) => [added, ...prev]);
+    const updatedList = [added, ...announcements];
+    setAnnouncements(updatedList);
+    storageService.saveAnnouncements(updatedList, true);
     setJudul('');
     setIsi('');
   };
 
   const handleDeleteAnnouncement = (id: string) => {
-    setAnnouncements((prev) => prev.filter((a) => a.id !== id));
+    const updatedList = announcements.filter((a) => a.id !== id);
+    setAnnouncements(updatedList);
+    storageService.saveAnnouncements(updatedList, true);
   };
 
   return (

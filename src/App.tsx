@@ -193,17 +193,13 @@ export default function App() {
     storageService.get('submissions', [])
   );
 
-  const [studentAttendances, setStudentAttendances] = useState<StudentAttendance[]>(() => {
-    const list = storageService.get<StudentAttendance[]>('studentAttendances', defaultStudentAttendances);
-    const todayStr = getTodayString();
-    return list.filter((sa) => sa.tanggal !== todayStr);
-  });
+  const [studentAttendances, setStudentAttendances] = useState<StudentAttendance[]>(() =>
+    storageService.get<StudentAttendance[]>('studentAttendances', defaultStudentAttendances)
+  );
 
-  const [teacherAttendances, setTeacherAttendances] = useState<TeacherAttendance[]>(() => {
-    const list = storageService.get<TeacherAttendance[]>('teacherAttendances', defaultTeacherAttendances);
-    const todayStr = getTodayString();
-    return list.filter((ta) => ta.tanggal !== todayStr);
-  });
+  const [teacherAttendances, setTeacherAttendances] = useState<TeacherAttendance[]>(() =>
+    storageService.get<TeacherAttendance[]>('teacherAttendances', defaultTeacherAttendances)
+  );
 
   const [teachingJournals, setTeachingJournals] = useState<TeachingJournal[]>(() => {
     const stored = storageService.get<TeachingJournal[]>('teachingJournals', defaultTeachingJournals);
@@ -225,10 +221,9 @@ export default function App() {
     storageService.get('libraryBooks', defaultLibraryBooks)
   );
 
-  const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>(() => {
-    storageService.saveCalendarEvents([]);
-    return [];
-  });
+  const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>(() =>
+    storageService.get('calendarEvents', defaultCalendarEvents)
+  );
 
   // CBT Exam Modal State
   const [activeExam, setActiveExam] = useState<Assessment | null>(null);
@@ -568,6 +563,8 @@ export default function App() {
                     teacherAttendances={teacherAttendances}
                     teachingJournals={teachingJournals}
                     assessments={assessments}
+                    submissions={submissions}
+                    students={students}
                     subjects={subjects}
                     classes={classes}
                     onNavigateTab={(tab) => setActiveTab(tab)}

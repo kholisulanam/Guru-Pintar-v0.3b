@@ -83,9 +83,10 @@ export const CbtExamModal: React.FC<CbtExamModalProps> = ({
       jawabanDetail: answers,
     };
 
-    // Save submission to storage
+    // Save submission to storage immediately
     const existing = storageService.getSubmissions();
-    storageService.saveSubmissions([...existing, submission]);
+    const updated = [...existing.filter((s) => !(s.assessmentId === assessment.id && s.siswaId === student.id)), submission];
+    storageService.saveSubmissions(updated, true);
 
     setSubmittedResult(submission);
     onSubmitted(submission);

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { GradeRecord, StudentItem, ClassItem, SubjectItem, SchoolSettings, User } from '../../types';
+import { storageService } from '../../lib/storage';
 import { Award, Save, FileSpreadsheet, Printer } from 'lucide-react';
 import { exportToExcel, exportToPdfReport } from '../../lib/exportUtils';
 import { KopSekolah } from '../common/KopSekolah';
@@ -76,7 +77,9 @@ export const GuruPenilaian: React.FC<GuruPenilaianProps> = ({
       (g) => !(g.kelasId === selectedKelas && g.mapelId === selectedMapel)
     );
 
-    setGradeRecords([...filtered, ...updatedRecords]);
+    const newRecords = [...filtered, ...updatedRecords];
+    setGradeRecords(newRecords);
+    storageService.saveGradeRecords(newRecords, true);
     alert(`Nilai Asesmen 1-3 & ASAS berhasil disimpan untuk ${classStudents.length} murid!`);
   };
 

@@ -49,6 +49,7 @@ export function exportToPdfReport({
   rows,
   settings,
   teacherName,
+  teacherTitle = 'Guru Mata Pelajaran',
   filename,
   hari,
   tanggal,
@@ -59,6 +60,7 @@ export function exportToPdfReport({
   rows: (string | number)[][];
   settings: SchoolSettings;
   teacherName?: string;
+  teacherTitle?: string;
   filename: string;
   hari?: string;
   tanggal?: string;
@@ -200,9 +202,10 @@ export function exportToPdfReport({
   doc.text('Mengetahui,', leftX, signatureY);
   doc.text('Kepala Madrasah', leftX, signatureY + 5);
 
-  // Right Side Signature Header: Guru / Penanggung Jawab
+  // Right Side Signature Header
   const rightX = pageWidth - 20;
-  doc.text('Guru / Penanggung Jawab,', rightX, signatureY + 5, { align: 'right' });
+  const rightTitle = teacherTitle ? `${teacherTitle},` : 'Guru Mata Pelajaran,';
+  doc.text(rightTitle, rightX, signatureY + 5, { align: 'right' });
 
   // Signature gap space
   const nameY = signatureY + 28;
@@ -214,7 +217,7 @@ export function exportToPdfReport({
   doc.text('NIP / NUPTK Terlampir', leftX, nameY + 5);
 
   // Right Name (Guru / Admin)
-  const actualTeacherName = teacherName || 'AHMAD ZAINI, S.Pd.I';
+  const actualTeacherName = teacherName || 'Nur Aida, S.Pd.I.';
   doc.setFont('helvetica', 'bold');
   doc.text(actualTeacherName, rightX, nameY, { align: 'right' });
   doc.setFont('helvetica', 'normal');

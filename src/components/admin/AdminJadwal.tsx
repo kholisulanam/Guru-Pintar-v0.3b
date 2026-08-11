@@ -105,7 +105,7 @@ export const AdminJadwal: React.FC<AdminJadwalProps> = ({
   const downloadTemplate = () => {
     const templateData = [
       { Hari: 'Senin', JamKe: '07.00-07.40', Kelas: 'XII IPA 1', Guru: 'SYAIFUDIN KUDSI, SHI. MA.', Mapel: 'Fiqih' },
-      { Hari: 'Senin', JamKe: '07.40-08.20', Kelas: 'XII IPA 1', Guru: 'AHMAD ZAINI, S.Pd.I', Mapel: 'Bahasa Arab' },
+      { Hari: 'Senin', JamKe: '07.40-08.20', Kelas: 'XII IPA 1', Guru: 'Nur Aida, S.Pd.I.', Mapel: 'Bahasa Arab' },
       { Hari: 'Selasa', JamKe: '07.00-07.40', Kelas: 'XI IPA 1', Guru: 'NURUL HIDAYATI, M.Pd.', Mapel: 'Matematika' },
     ];
     exportToExcel(templateData, 'Template_Jadwal_Pelajaran_MAS_Al_Amien', 'Jadwal Hari');

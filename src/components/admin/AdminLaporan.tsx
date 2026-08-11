@@ -229,13 +229,24 @@ export const AdminLaporan: React.FC<AdminLaporanProps> = ({
       ]);
     }
 
+    const signerName =
+      reportType === 'presensi_siswa'
+        ? (currentClassObj?.waliKelas || currentGuruObj?.nama || 'Nur Aida, S.Pd.I.')
+        : (currentGuruObj?.nama || 'Nur Aida, S.Pd.I.');
+
+    const signerTitle =
+      reportType === 'presensi_siswa'
+        ? 'Wali Kelas'
+        : 'Guru Mata Pelajaran';
+
     exportToPdfReport({
       title,
       subtitle,
       headers,
       rows,
       settings,
-      teacherName: currentGuruObj?.nama || 'AHMAD ZAINI, S.Pd.I',
+      teacherName: signerName,
+      teacherTitle: signerTitle,
       filename: `Laporan_${reportType}_${Date.now()}`,
       tanggal: modePeriode === 'harian' ? selectedTanggal : undefined,
     });
@@ -587,7 +598,19 @@ export const AdminLaporan: React.FC<AdminLaporanProps> = ({
         </div>
 
         {/* TTD Official Signature Block */}
-        <TandaTangan settings={settings} guruNama={currentGuruObj?.nama || 'AHMAD ZAINI, S.Pd.I'} />
+        <TandaTangan
+          settings={settings}
+          guruNama={
+            reportType === 'presensi_siswa'
+              ? (currentClassObj?.waliKelas || currentGuruObj?.nama || 'Nur Aida, S.Pd.I.')
+              : (currentGuruObj?.nama || 'Nur Aida, S.Pd.I.')
+          }
+          jabatan={
+            reportType === 'presensi_siswa'
+              ? 'Wali Kelas'
+              : 'Guru Mata Pelajaran'
+          }
+        />
 
         {/* Menu Cetak Excel & Cetak PDF dipindahkan ke bawah preview / akhir halaman */}
         <div className="mt-8 pt-6 border-t border-slate-200 flex flex-wrap items-center justify-end gap-3 print:hidden">

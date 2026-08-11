@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Assessment, ClassItem, SubjectItem, TeacherItem, Question, User, StudentItem, ScheduleItem } from '../../types';
+import { storageService } from '../../lib/storage';
 import { canUserAccessAssessment } from '../../lib/assessmentUtils';
 import { defaultStudents, defaultClasses } from '../../lib/initialData';
 import { isClassMatch } from '../../lib/matchUtils';
@@ -175,7 +176,9 @@ export const AdminAsesmen: React.FC<AdminAsesmenProps> = ({
       aktif: false,
     };
 
-    setAssessments((prev) => [duplicated, ...prev]);
+    const updatedList = [duplicated, ...assessments];
+    setAssessments(updatedList);
+    storageService.saveAssessments(updatedList, true);
     alert(`Asesmen "${asm.judul}" berhasil disalin beserta ${newSoalList.length} soalnya!`);
   };
 
@@ -353,24 +356,24 @@ export const AdminAsesmen: React.FC<AdminAsesmenProps> = ({
 
     if (editingAssessmentId) {
       // Update existing assessment
-      setAssessments((prev) =>
-        prev.map((a) =>
-          a.id === editingAssessmentId
-            ? {
-                ...a,
-                judul,
-                kelasId,
-                mapelId,
-                guruId,
-                createdBy: a.createdBy || creatorId,
-                targetSiswaIds: finalTargetSiswaIds,
-                lamaUjianMenit,
-                jumlahSoal: soalList.length,
-                soalList,
-              }
-            : a
-        )
+      const updatedList = assessments.map((a) =>
+        a.id === editingAssessmentId
+          ? {
+              ...a,
+              judul,
+              kelasId,
+              mapelId,
+              guruId,
+              createdBy: a.createdBy || creatorId,
+              targetSiswaIds: finalTargetSiswaIds,
+              lamaUjianMenit,
+              jumlahSoal: soalList.length,
+              soalList,
+            }
+          : a
       );
+      setAssessments(updatedList);
+      storageService.saveAssessments(updatedList, true);
       alert('Perubahan Asesmen & Soal berhasil disimpan!');
     } else {
       // Create new assessment
@@ -390,7 +393,9 @@ export const AdminAsesmen: React.FC<AdminAsesmenProps> = ({
         soalList,
       };
 
-      setAssessments((prev) => [added, ...prev]);
+      const updatedList = [added, ...assessments];
+      setAssessments(updatedList);
+      storageService.saveAssessments(updatedList, true);
       alert('Asesmen baru berhasil diterbitkan!');
     }
 
@@ -399,13 +404,15 @@ export const AdminAsesmen: React.FC<AdminAsesmenProps> = ({
   };
 
   const handleToggleAktif = (id: string) => {
-    setAssessments((prev) =>
-      prev.map((a) => (a.id === id ? { ...a, aktif: !a.aktif } : a))
-    );
+    const updatedList = assessments.map((a) => (a.id === id ? { ...a, aktif: !a.aktif } : a));
+    setAssessments(updatedList);
+    storageService.saveAssessments(updatedList, true);
   };
 
   const handleDeleteAssessment = (id: string) => {
-    setAssessments((prev) => prev.filter((a) => a.id !== id));
+    const updatedList = assessments.filter((a) => a.id !== id);
+    setAssessments(updatedList);
+    storageService.saveAssessments(updatedList, true);
   };
 
   return (

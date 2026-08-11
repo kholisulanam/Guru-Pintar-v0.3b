@@ -63,7 +63,7 @@ export const defaultTeachers: TeacherItem[] = [
   },
   {
     id: 'usr-guru2',
-    nama: 'AHMAD ZAINI, S.Pd.I',
+    nama: 'Nur Aida, S.Pd.I.',
     nuptk: '198203152009021005',
     mengajarMapel: 'Bahasa Arab & Al-Qur\'an Hadits',
     email: 'zaini@al-amien.sch.id',
@@ -518,7 +518,7 @@ export const defaultTeachingJournals: TeachingJournal[] = [
   {
     id: 'tj-2',
     guruId: 'usr-guru2',
-    guruNama: 'AHMAD ZAINI, S.Pd.I',
+    guruNama: 'Nur Aida, S.Pd.I.',
     tanggal: '2026-08-01',
     jamKe: '07.00 - 08.30',
     kelasId: 'cls-12a',
